@@ -23,10 +23,6 @@ if(USE_ROS)
   add_library(${PROJECT_NAME} SHARED ${CC_FILES})
   target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
 
-  if(CATKIN_ENABLE_TESTING)
-    catkin_add_gtest(test_apriltag_mit test/test_apriltag_mit.cpp)
-    target_link_libraries(test_apriltag_mit ${catkin_LIBRARIES} ${PROJECT_NAME})
-  endif()
 
   install(TARGETS ${PROJECT_NAME}
           ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

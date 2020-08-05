@@ -18,16 +18,6 @@ if(USE_ROS)
   add_library(${PROJECT_NAME} SHARED ${C_FILES})
   target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} m)
 
-  if(CATKIN_ENABLE_TESTING)
-    find_package(OpenCV REQUIRED)
-    include_directories(${OpenCV_INCLUDE_DIRS})
-    catkin_add_gtest(test_apriltag_umich test/test_apriltag_umich.cpp)
-    target_link_libraries(test_apriltag_umich
-                          ${PROJECT_NAME}
-                          ${OpenCV_LIBRARIES}
-                          ${catkin_LIBRARIES})
-  endif()
-
   install(TARGETS ${PROJECT_NAME}
           ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
           LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

@@ -22,6 +22,7 @@
 <group ns="drone">
 	<param name="robot_description" command="$(find xacro)/xacro '$(find tracker)/urdf/camera.xacro'" />
 	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model drone -param robot_description"/>
+	<node name="move_drone" pkg="tracker" type="move_drone" respawn="false" output="screen"/>
 </group>
 
 <node name="image_view" pkg="image_view" type="image_view" output="screen" respawn="false">

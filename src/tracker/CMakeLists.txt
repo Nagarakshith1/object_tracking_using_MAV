@@ -139,6 +139,9 @@ include_directories(
 add_executable(move_target src/move_target.cpp)
 target_link_libraries(move_target ${catkin_LIBRARIES})
 
+add_executable(move_drone src/move_drone.cpp)
+target_link_libraries(move_drone ${catkin_LIBRARIES})
+
 
 
 ## Rename C++ executable without prefix

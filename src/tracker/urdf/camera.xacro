@@ -4,10 +4,10 @@
 	<origin xyz="0 0 0"/>
 </link>
 
-<joint name="camera_joint" type="fixed">
+<joint name="camera_joint" type="floating">
 	<parent link="world"/>
 	<child link="camera_link"/>
-	<origin xyz="0.2 0 0.5" rpy="0.0 1.5708 1.5708"/>
+	<origin xyz="0.2 0 0.5" rpy="0.0 ${pi/2} ${pi/2}"/>
 </joint>
 
 <link name="camera_link">
@@ -33,8 +33,8 @@
     </inertial>
   </link>
 
-  <gazebo reference="camera_link"> 	  
-    <static>true</static>
+  <gazebo reference="camera_link">
+    <turnGravityOff>true</turnGravityOff> 	  
     <sensor type="camera" name="camera">
       <update_rate>30.0</update_rate>
       <camera name="head">
@@ -72,6 +72,15 @@
         <distortionT2>0.0</distortionT2>
       </plugin>
     </sensor>
+  </gazebo>
+  <gazebo>
+    <plugin name="drone_controller" filename="libgazebo_ros_planar_move.so">
+        <commandTopic>cmd_vel</commandTopic>
+        <odometryTopic>odom</odometryTopic>
+        <odometryFrame>odom</odometryFrame>
+        <odometryRate>10.0</odometryRate>
+        <robotBaseFrame>camera_link</robotBaseFrame>
+      </plugin>
   </gazebo>
 <!-- <gazebo>
     <static>true</static>
