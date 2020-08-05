@@ -14,15 +14,15 @@
 </include>
 
 <group ns="april_tag">
-	<param name="robot_description" command="$(find xacro)/xacro '$(find tracker)/urdf/april_tag.xacro'" />
+	<param name="robot_description" command="$(find xacro)/xacro '$(find simulator)/urdf/april_tag.xacro'" />
 	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model april_tag -param robot_description"/>
-	<node name="move_target" pkg="tracker" type="move_target" respawn="false" output="screen"/>
+	<node name="move_target" pkg="simulator" type="move_target" respawn="false" output="screen"/>
 </group>
 
 <group ns="drone">
-	<param name="robot_description" command="$(find xacro)/xacro '$(find tracker)/urdf/camera.xacro'" />
+	<param name="robot_description" command="$(find xacro)/xacro '$(find simulator)/urdf/camera.xacro'" />
 	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model drone -param robot_description"/>
-	<node name="move_drone" pkg="tracker" type="move_drone" respawn="false" output="screen"/>
+	<node name="move_drone" pkg="simulator" type="move_drone" respawn="false" output="screen"/>
 </group>
 
 <node name="image_view" pkg="image_view" type="image_view" output="screen" respawn="false">

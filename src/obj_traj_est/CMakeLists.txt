@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(tracker)
+project(obj_traj_est)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,11 +8,13 @@ project(tracker)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
   roscpp
   rospy
   std_msgs
-  geometry_msgs
+  Eigen REQUIRED
 )
+
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -71,7 +73,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs
+#   geometry_msgs#   std_msgs
 # )
 
 ################################################
@@ -105,8 +107,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES tracker
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  LIBRARIES obj_traj_est
+#  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -119,11 +121,12 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/tracker.cpp
+#   src/${PROJECT_NAME}/obj_traj_est.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -134,15 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/tracker_node.cpp)
-
-add_executable(move_target src/move_target.cpp)
-target_link_libraries(move_target ${catkin_LIBRARIES})
-
-add_executable(move_drone src/move_drone.cpp)
-target_link_libraries(move_drone ${catkin_LIBRARIES})
-
-
+# add_executable(${PROJECT_NAME}_node src/obj_traj_est_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -206,7 +201,7 @@ target_link_libraries(move_drone ${catkin_LIBRARIES})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_tracker.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_obj_traj_est.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
