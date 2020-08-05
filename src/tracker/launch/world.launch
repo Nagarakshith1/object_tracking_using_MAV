@@ -1,0 +1,41 @@
+<launch>
+<arg name="paused" default="false"/>
+<arg name="use_sim_time" default= "true"/>
+<arg name="gui" default="true"/>
+<arg name="headless" default="false"/>
+<arg name="debug" default="false"/>
+
+<include file="$(find gazebo_ros)/launch/empty_world.launch">
+<arg name="debug" value="$(arg debug)" />
+<arg name="gui" value="$(arg gui)" />
+<arg name="paused" value="$(arg paused)"/>
+<arg name="use_sim_time" value="$(arg use_sim_time)"/>
+<arg name="headless" value="$(arg headless)"/>
+</include>
+
+<group ns="april_tag">
+	<param name="robot_description" command="$(find xacro)/xacro '$(find tracker)/urdf/april_tag.xacro'" />
+	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model april_tag -param robot_description"/>
+	<node name="move_target" pkg="tracker" type="move_target" respawn="false" output="screen"/>
+</group>
+
+<group ns="drone">
+	<param name="robot_description" command="$(find xacro)/xacro '$(find tracker)/urdf/camera.xacro'" />
+	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model drone -param robot_description"/>
+</group>
+
+<node name="image_view" pkg="image_view" type="image_view" output="screen" respawn="false">
+	<remap from="image" to = "/drone/camera/image_raw"/>
+</node>
+<include file = "$(find apriltag_ros)/launch/pose_estimator.launch" />
+</launch>
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,16 @@
+material Apriltag1
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      texture_unit
+      {
+        texture april_tag.png
+        filtering none none none
+        scale 1.0 1.0
+      }
+    }
+  }
+}
