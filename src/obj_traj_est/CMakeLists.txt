@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(include ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 
 catkin_package(INCLUDE_DIRS 
@@ -20,12 +20,6 @@ catkin_package(INCLUDE_DIRS
   #LIBRARIES obj_traj_est
   CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs pcl_ros
   #DEPENDS Eigen
-)
-
-
-include_directories(
- include
-  ${catkin_INCLUDE_DIRS}
 )
 
 add_library(k_filter src/k_filter.cpp)
