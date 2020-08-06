@@ -10,23 +10,36 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   pcl_ros
   std_msgs
+  message_generation
+  ${MESSAGE_DEPENDENCIES}
 )
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
+add_message_files(
+  FILES
+  traj_msg.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 catkin_package(INCLUDE_DIRS 
   #include
   #LIBRARIES obj_traj_est
-  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs pcl_ros
+  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs pcl_ros message_runtime
   #DEPENDS Eigen
 )
+
 
 
 include_directories(
  include
   ${catkin_INCLUDE_DIRS}
 )
+
 
 add_library(k_filter src/k_filter.cpp)
 
