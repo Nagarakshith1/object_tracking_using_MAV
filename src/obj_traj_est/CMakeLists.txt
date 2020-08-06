@@ -42,6 +42,7 @@ include_directories(
 
 
 add_library(k_filter src/k_filter.cpp)
+add_library(traj src/traj.cpp)
 
 add_executable(test_eigen src/test_eigen.cpp)
 #add_dependencies(test_eigen ${catkin_EXPORTED_TARGETS})
