@@ -20,13 +20,7 @@ public:
 
     KalmanFilter();
 
-    KalmanFilter(const state &x_init, const sq_matrix &q_init,const measurement_noise &r_init, const sq_matrix &p_init) : _x{x_init}, _Q{q_init}, _R{r_init}, _P{p_init} 
-    {
-        _H.setZero();
-        _H(0,0) = 1;
-        _H(1,1) = 1;
-        _H(2,2) = 1;
-    }
+    KalmanFilter(const state &x_init, const sq_matrix &q_init,const measurement_noise &r_init, const sq_matrix &p_init);
 
     void Initialize(const state &x_init,const sq_matrix &q_init, const measurement_noise &r_init,const sq_matrix &p_init);
 
