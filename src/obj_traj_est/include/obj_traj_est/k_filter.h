@@ -2,7 +2,10 @@
 #define K_FILTER_H
 
 #include <iostream>
-#include <Eigen/Dense>
+#include <ros/ros.h>
+//#include<pcl/point_types.h>
+#include <Eigen/Core>
+#include <Eigen/LU>
 
 const int n_states{9};
 const int n_meas{3}; 
@@ -19,7 +22,7 @@ public:
 
     KalmanFilter(const state &x_init, const sq_matrix &q_init,const measurement_noise &r_init, const sq_matrix &p_init) : _x{x_init}, _Q{q_init}, _R{r_init}, _P{p_init} 
     {
-        _H.setzero();
+        _H.setZero();
         _H(0,0) = 1;
         _H(1,1) = 1;
         _H(2,2) = 1;
