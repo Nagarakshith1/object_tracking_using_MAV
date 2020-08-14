@@ -77,5 +77,6 @@ visualization_msgs::Marker Traj::to_vismsg(){
 
 		marker.points.push_back(p);
 	}
+	return marker;
 
 }
