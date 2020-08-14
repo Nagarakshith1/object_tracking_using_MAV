@@ -47,11 +47,9 @@ add_library(traj src/traj.cpp)
 add_executable(test_eigen src/test_eigen.cpp)
 #add_dependencies(test_eigen ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_eigen k_filter ${catkin_LIBRARIES})
-<<<<<<< HEAD
 
 
 add_executable(obj_traj src/obj_traj.cpp)
 add_dependencies(obj_traj ${catkin_EXPORTED_TARGETS})
 target_link_libraries(obj_traj k_filter traj ${catkin_LIBRARIES})
-=======
->>>>>>> 845a7c1d1e95f8a91b3a460fb1d1fbe84f4deb71
+
