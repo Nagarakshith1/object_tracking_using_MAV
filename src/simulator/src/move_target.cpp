@@ -10,7 +10,7 @@ int main(int argc,char **argv){
 	while(ros::ok()){
 		geometry_msgs::Twist twist_cmd;
 
-		twist_cmd.linear.x = 0;
+		twist_cmd.linear.x = 0.01;
 		twist_cmd.linear.y = 0;
 		twist_cmd.linear.z = 0;
 

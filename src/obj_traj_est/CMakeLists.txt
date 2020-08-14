@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
   rospy
-  pcl_ros
+  nav_msgs
   std_msgs
   message_generation
   ${MESSAGE_DEPENDENCIES}
@@ -29,7 +29,7 @@ generate_messages(
 catkin_package(INCLUDE_DIRS 
   #include
   #LIBRARIES obj_traj_est
-  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs pcl_ros message_runtime
+  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs message_runtime
   #DEPENDS Eigen
 )
 
@@ -42,7 +42,13 @@ include_directories(
 
 
 add_library(k_filter src/k_filter.cpp)
+add_library(traj src/traj.cpp)
 
 add_executable(test_eigen src/test_eigen.cpp)
 #add_dependencies(test_eigen ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_eigen k_filter ${catkin_LIBRARIES})
+
+
+add_executable(obj_traj src/obj_traj.cpp)
+add_dependencies(obj_traj ${catkin_EXPORTED_TARGETS})
+target_link_libraries(obj_traj k_filter traj ${catkin_LIBRARIES})

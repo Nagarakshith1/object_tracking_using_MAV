@@ -1,6 +1,6 @@
 <?xml version ="1.0"?>
 <robot name="april_tag" xmlns:xacro="http://ros.org/wiki/xacro">
-	<link name="base_link">
+	<link name="april_tag_base_link">
 		<visual>
 			<geometry>
 				<box size="0.2 0.2 0.001"/>
@@ -22,7 +22,7 @@
 
   </link>
 	
-	<gazebo reference="base_link">
+	<gazebo reference="april_tag_base_link">
 		<material>Apriltag1</material>
   </gazebo>
   <gazebo>
@@ -31,7 +31,7 @@
         <odometryTopic>odom</odometryTopic>
         <odometryFrame>odom</odometryFrame>
         <odometryRate>10.0</odometryRate>
-        <robotBaseFrame>base_link</robotBaseFrame>
+        <robotBaseFrame>april_tag_link</robotBaseFrame>
       </plugin>
   </gazebo>
 

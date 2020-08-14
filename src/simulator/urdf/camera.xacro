@@ -77,9 +77,9 @@
     <plugin name="drone_controller" filename="libgazebo_ros_planar_move.so">
         <commandTopic>cmd_vel</commandTopic>
         <odometryTopic>odom</odometryTopic>
-        <odometryFrame>odom</odometryFrame>
+        <odometryFrame>drone_odom</odometryFrame>
         <odometryRate>10.0</odometryRate>
-        <robotBaseFrame>camera_link</robotBaseFrame>
+        <robotBaseFrame>drone_link</robotBaseFrame>
       </plugin>
   </gazebo>
 <!-- <gazebo>
