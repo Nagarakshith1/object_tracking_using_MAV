@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   std_msgs
   message_generation
+  visualization_msgs
   ${MESSAGE_DEPENDENCIES}
 )
 find_package(Eigen3 REQUIRED)
@@ -29,7 +30,7 @@ generate_messages(
 catkin_package(INCLUDE_DIRS 
   #include
   #LIBRARIES obj_traj_est
-  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs message_runtime
+  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs message_runtime visualization_msgs
   #DEPENDS Eigen
 )
 

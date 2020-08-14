@@ -175,8 +175,10 @@ int main(int argc,char **argv){
 	ros::Subscriber april_pose_odom = n.subscribe("/apriltag_pose_estimator/apriltag_poses",1,&apriltag_pose_callback);
 
 	ros::Publisher obj_traj_pub = n.advertise<obj_traj_est::traj_msg>("/obj_traj_coeff",1);
+	ros::Publisher obj_vis_pub = n.advertise<visualization_msgs::Marker>("/obj_traj_vis",1);
 
 	obj_traj_est::traj_msg msg;
+	visualization_msgs::Marker vis_msg;
 
 	int planning_rate = 1;
 	planning_horizon = 1;
@@ -187,6 +189,9 @@ int main(int argc,char **argv){
 
 		msg = tr.to_rosmsg();
 		obj_traj_pub.publish(msg);
+
+		vis_msg = tr.to_vismsg();
+		obj_vis_pub.publish(vis_msg);
 
 		ros::spinOnce();
 		replan_rate.sleep();
