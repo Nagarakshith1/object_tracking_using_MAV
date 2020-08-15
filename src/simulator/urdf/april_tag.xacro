@@ -5,7 +5,7 @@
 			<geometry>
 				<box size="0.2 0.2 0.001"/>
 			</geometry>
-      <origin xyz="0.2 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
 		</visual>
 
 		<inertial>
@@ -30,7 +30,7 @@
         <commandTopic>cmd_vel</commandTopic>
         <odometryTopic>odom</odometryTopic>
         <odometryFrame>odom</odometryFrame>
-        <odometryRate>10.0</odometryRate>
+        <odometryRate>20.0</odometryRate>
         <robotBaseFrame>april_tag_link</robotBaseFrame>
       </plugin>
   </gazebo>

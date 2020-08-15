@@ -7,7 +7,7 @@
 <joint name="camera_joint" type="floating">
 	<parent link="world"/>
 	<child link="camera_link"/>
-	<origin xyz="0.2 0 0.5" rpy="0.0 ${pi/2} ${pi/2}"/>
+	<origin xyz="0 0 3" rpy="0.0 ${pi/2} ${pi/2}"/>
 </joint>
 
 <link name="camera_link">
@@ -78,7 +78,7 @@
         <commandTopic>cmd_vel</commandTopic>
         <odometryTopic>odom</odometryTopic>
         <odometryFrame>drone_odom</odometryFrame>
-        <odometryRate>10.0</odometryRate>
+        <odometryRate>20.0</odometryRate>
         <robotBaseFrame>drone_link</robotBaseFrame>
       </plugin>
   </gazebo>

@@ -30,7 +30,7 @@
 </node>
 <include file = "$(find apriltag_ros)/launch/pose_estimator.launch" />
 
-<node pkg="tf" type="static_transform_publisher" name="drone_broadcaster" args="0 0 0.5 -0.5 0.5 0.5 0.5 odom drone_odom 100" />
+<node pkg="tf" type="static_transform_publisher" name="drone_broadcaster" args="0 0 3 -0.5 0.5 0.5 0.5 odom drone_odom 100" />
 </launch>
 
 

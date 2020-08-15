@@ -5,18 +5,18 @@ int main(int argc,char **argv){
 	ros::init(argc,argv,"move_target");
 	ros::NodeHandle n;
 	ros::Publisher pub = n.advertise<geometry_msgs::Twist>("cmd_vel",1);
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(20);
 	
 	while(ros::ok()){
 		geometry_msgs::Twist twist_cmd;
 
-		twist_cmd.linear.x = 0.01;
+		twist_cmd.linear.x = 0.2;
 		twist_cmd.linear.y = 0;
 		twist_cmd.linear.z = 0;
 
 		twist_cmd.angular.x = 0;
 		twist_cmd.angular.y = 0;
-		twist_cmd.angular.z = 0;
+		twist_cmd.angular.z = 0.2;
 
 		pub.publish(twist_cmd);
 		ros::spinOnce();

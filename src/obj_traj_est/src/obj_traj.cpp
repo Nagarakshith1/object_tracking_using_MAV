@@ -10,6 +10,8 @@
 
 Eigen::Matrix<double,3,1> t_drone;
 Eigen::Matrix<double,3,3> R_drone;
+Eigen::Matrix3d R_drone_cam;
+
 
 Eigen::Matrix<double,3,1> t_obj_drone;
 Eigen::Matrix<double,3,3> R_obj_drone;
@@ -21,7 +23,7 @@ Eigen::Matrix<double,3,1> t_obj_world;
 Eigen::Matrix<double,8,3> obj_coeff;
 
 const int odom_buffer_size = 5;
-const int n_obs =10;
+const int n_obs =20;
 
 const int p_order = 2;
 const int drone_p_order = 7;
@@ -55,11 +57,19 @@ void apriltag_pose_callback(const apriltag_msgs::ApriltagPoseStamped &msg){
 			   	   msg.posearray.poses[0].position.y,
 			       msg.posearray.poses[0].position.z;
 
+
+	// static int iter=0;
 	static double last_time = 0;
 	double curr_time = msg.header.stamp.toSec();
+	// ROS_ERROR_STREAM("curr_time" << curr_time);
+	// ROS_ERROR_STREAM("last time" << last_time);
 	double dt = curr_time - last_time;
+	// ROS_ERROR_STREAM("dt" << dt);
 	last_time += dt;
-
+	// iter++;
+	// if(iter==4){
+	// while(1);
+	// }
 	// Convert to the world frame.
 	// Find the nearest drone odom.
 	double min_dtime = std::numeric_limits<double>::infinity();
@@ -94,7 +104,7 @@ void apriltag_pose_callback(const apriltag_msgs::ApriltagPoseStamped &msg){
 	// odoms.erase(odoms.begin(),i);
 
 
-	t_obj_world = R_drone*t_obj_drone + t_drone;
+	t_obj_world = R_drone*R_drone_cam*t_obj_drone + t_drone;
 
 	// ROS_ERROR_STREAM("a" << t_obj_world);
 	static int obs_count=0;
@@ -108,7 +118,7 @@ void apriltag_pose_callback(const apriltag_msgs::ApriltagPoseStamped &msg){
 				observations(i,3)+=observations(i+1,3);
 			}
 		}
-		ROS_ERROR_STREAM("." << observations);
+		
 		return;
 	}
 	else{
@@ -131,7 +141,7 @@ void apriltag_pose_callback(const apriltag_msgs::ApriltagPoseStamped &msg){
 
 	// observations.col(3)-= observations(n_obs-1,3)*Eigen::Matrix<double,n_obs,1>::Ones();
 	// observations.col(3)-= observations(0,3)*Eigen::Matrix<double,n_obs,1>::Ones();
-	ROS_ERROR_STREAM("." << observations);
+	
 	if((observations.col(0).sum()+observations.col(1).sum()) == 0){ 
 		ROS_INFO("Object not moving");
 		return;
@@ -180,8 +190,11 @@ int main(int argc,char **argv){
 	obj_traj_est::traj_msg msg;
 	visualization_msgs::Marker vis_msg;
 
-	int planning_rate = 1;
-	planning_horizon = 1;
+	int planning_rate = 20;
+	planning_horizon = 3;
+	R_drone_cam<< 1,0,0,
+		      0,-1,0,
+	    	  0,0,1;
 
 	ros::Rate replan_rate(planning_rate);
 
@@ -190,9 +203,10 @@ int main(int argc,char **argv){
 		msg = tr.to_rosmsg();
 		obj_traj_pub.publish(msg);
 
+		
 		vis_msg = tr.to_vismsg();
 		obj_vis_pub.publish(vis_msg);
-
+		
 		ros::spinOnce();
 		replan_rate.sleep();
 
