@@ -22,7 +22,7 @@
 <group ns="drone">
 	<param name="robot_description" command="$(find xacro)/xacro '$(find simulator)/urdf/camera.xacro'" />
 	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model drone -param robot_description"/>
-	<node name="move_drone" pkg="simulator" type="move_drone" respawn="false" output="screen"/>
+	<!-- <node name="move_drone" pkg="simulator" type="move_drone" respawn="false" output="screen"/> -->
 </group>
 
 <node name="image_view" pkg="image_view" type="image_view" output="screen" respawn="false">
@@ -30,7 +30,8 @@
 </node>
 <include file = "$(find apriltag_ros)/launch/pose_estimator.launch" />
 
-<node pkg="tf" type="static_transform_publisher" name="drone_broadcaster" args="0 0 3 -0.5 0.5 0.5 0.5 odom drone_odom 100" />
+<!-- <node pkg="tf" type="static_transform_publisher" name="drone_broadcaster" args="0 0 3 -0.5 0.5 0.5 0.5 odom drone_odom 100" /> -->
+<node pkg="tf" type="static_transform_publisher" name="drone_broadcaster" args="0 0 3 0 0 0 1 odom drone_odom 100" />
 </launch>
 
 

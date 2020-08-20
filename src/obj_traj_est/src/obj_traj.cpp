@@ -196,6 +196,7 @@ int main(int argc,char **argv){
 		      0,-1,0,
 	    	  0,0,1;
 
+	tr.set_planning_horizon(planning_horizon);
 	ros::Rate replan_rate(planning_rate);
 
 	while(ros::ok()){

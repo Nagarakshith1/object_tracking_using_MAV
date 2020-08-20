@@ -1,28 +1,56 @@
 #include <obj_traj_est/traj.h>
-
+#include <ros/ros.h>
 Traj::Traj(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &c, float planning_horizon){
 	_coefficients = c;
 	_planning_horizon = planning_horizon;
 	_n_order = c.rows()-1;
 	_n_dimensions = c.cols();
+
+	_power_vec = Eigen::VectorXd::LinSpaced(_n_order+1,_n_order,0);
+	_power_vec_deriv_1.conservativeResize(_n_order+1,1);
+	_power_vec_deriv_1 << Eigen::VectorXd::LinSpaced(_n_order,_n_order-1,0),0;
+	
+	_power_vec_deriv_2.conservativeResize(_n_order+1,1);
+	_power_vec_deriv_2 << Eigen::VectorXd::LinSpaced(_n_order-1,_n_order-2,0),0,0;
+	
+	_power_vec_deriv_3.conservativeResize(_n_order+1,1);
+	_power_vec_deriv_3 << Eigen::VectorXd::LinSpaced(_n_order-2,_n_order-3,0),0,0,0;
+
+	Eigen::MatrixXd deriv_1 = Eigen::MatrixXd::Zero(_n_order+1,_n_order+1);
+	deriv_1.bottomLeftCorner(_n_order,_n_order) = _power_vec.topLeftCorner(_n_order,1).asDiagonal();
+	auto deriv_2 = deriv_1*deriv_1;
+	auto deriv_3 = deriv_1*deriv_2;
+
+	_deriv_1_coeff = deriv_1.colwise().sum().transpose();
+	_deriv_2_coeff = deriv_2.colwise().sum().transpose();
+	_deriv_3_coeff = deriv_3.colwise().sum().transpose();
+		
 }
 
 void Traj::set_coefficients(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &c){
 	_coefficients = c;
+}
+void Traj::set_planning_horizon(double time){
+	_planning_horizon = time;
 }
 
 Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> Traj::get_coefficients(){
 	return _coefficients;
 }
 
-Eigen::MatrixXd Traj::evaluate(Eigen::VectorXd times){
+Eigen::MatrixXd Traj::evaluate(const Eigen::VectorXd &times,int order=0){
 	Eigen::MatrixXd basis;
 	
 	basis.conservativeResize(times.rows(),_n_order+1);
-	for(int i=_n_order;i>0;--i){
-		basis.col(_n_order-i) << times.array().pow(i).matrix();
+	// for(int i=_n_order;i>0;--i){
+	// 	basis.col(_n_order-i) << times.array().pow(i).matrix();
+	// }
+	// basis.col(_n_order).setOnes();
+	// return basis*_coefficients;
+
+	for(int i=0;i<times.size();i++){
+		basis.row(i) = gen_basis(times[i],order);
 	}
-	basis.col(_n_order).setOnes();
 	return basis*_coefficients;
 }	
 
@@ -39,7 +67,21 @@ obj_traj_est::traj_msg Traj::to_rosmsg(){
 	return msg;
 
 }
+Eigen::VectorXd Traj::gen_basis(double time, int order){
+	auto time_vec = time * Eigen::VectorXd::Ones(_n_order+1);
 
+	switch(order){
+		case 0: return Eigen::pow(time_vec.array(),_power_vec.array());
+				break;
+		case 1: return (_deriv_1_coeff.array() * Eigen::pow(time_vec.array(),_power_vec_deriv_1.array()));
+				break;
+		case 2: return(_deriv_2_coeff.array() * Eigen::pow(time_vec.array(),_power_vec_deriv_2.array()));
+				break;
+		case 3: return (_deriv_3_coeff.array() * Eigen::pow(time_vec.array(),_power_vec_deriv_3.array()));
+				break;
+	}
+
+}
 
 visualization_msgs::Marker Traj::to_vismsg(){
 	visualization_msgs::Marker marker;
@@ -64,7 +106,7 @@ visualization_msgs::Marker Traj::to_vismsg(){
 	marker.color.g = 1.0;
 	marker.color.b = 1.0;
 
-	double dt = 0.5;
+	double dt = 0.1;
 	
 	auto path = Traj::evaluate(Eigen::VectorXd::LinSpaced(int(_planning_horizon/dt),0.0,_planning_horizon).transpose());
 	

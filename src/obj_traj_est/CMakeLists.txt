@@ -28,10 +28,10 @@ generate_messages(
 )
 
 catkin_package(INCLUDE_DIRS 
-  #include
+  include
   #LIBRARIES obj_traj_est
   CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs message_runtime visualization_msgs
-  #DEPENDS Eigen
+  #DEPENDS Eigen3
 )
 
 
@@ -54,3 +54,7 @@ add_executable(obj_traj src/obj_traj.cpp)
 add_dependencies(obj_traj ${catkin_EXPORTED_TARGETS})
 target_link_libraries(obj_traj k_filter traj ${catkin_LIBRARIES})
 
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE)

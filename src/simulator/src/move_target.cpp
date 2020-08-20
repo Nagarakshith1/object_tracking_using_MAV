@@ -16,7 +16,7 @@ int main(int argc,char **argv){
 
 		twist_cmd.angular.x = 0;
 		twist_cmd.angular.y = 0;
-		twist_cmd.angular.z = 0.2;
+		twist_cmd.angular.z = 0.1;
 
 		pub.publish(twist_cmd);
 		ros::spinOnce();
