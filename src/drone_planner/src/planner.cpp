@@ -133,7 +133,7 @@ double objective_function(const std::vector<double> &x, std::vector<double> &gra
 	Eigen::Vector3d b_dot = genB(0, 1).transpose()*(h - c);
 
 	if(b_dot.dot(b) <= 0 || b_dot.norm() < thresh){
-		lambda_0 = 0.7;
+		lambda_0 = 0.3;
 	}
 	else lambda_0 = 0;
 

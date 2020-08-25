@@ -20,7 +20,8 @@
 <group ns = "april_tag">
 	<param name = "robot_description_april" command = "$(find xacro)/xacro '$(find simulator)/urdf/april_tag.xacro'"/>
 	<node name = "urdf_spawner" pkg = "gazebo_ros" type = "spawn_model" respawn = "false" output = "screen" args = "-urdf -model april_tag -param robot_description_april"/>
-	<node name = "move_target" pkg = "simulator" type = "move_target" respawn = "false" output = "screen"/>
+	<!-- <node name = "move_target" pkg = "simulator" type = "move_target" respawn = "false" output = "screen"/> -->
+	<!-- <node name = "teleop_twist_keyboard" pkg = "teleop_twist_keyboard_cpp" type = "teleop_twist_keyboard" respawn = "false" output = "screen"/> -->
 	<node name = "obj_traj" pkg = "obj_traj_est" type = "obj_traj" respawn = "false" output = "screen">
 		<param name = "planning_horizon" value = "3.0"/>
 		<param name = "planning_rate" value = "20"/>
