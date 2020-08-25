@@ -21,6 +21,7 @@ double lambda_3;					// Jerk weighting factor in the cost function
 const double gravity  = 9.81;
 const int n_vis_normals = 4; 		// The number of normals for the visual constraints
 std::vector<double> fixed_c(6);		// The vector to store the known coefficients 
+const double thresh = 0.02;
 Traj drone_tr; 
 
 Eigen::MatrixXd normals; 			// Normals of the planes of the pyramid formed by the camera
@@ -125,7 +126,17 @@ Eigen::MatrixXd genB(double t, int order) {
 double objective_function(const std::vector<double> &x, std::vector<double> &grad, void *my_func_data) {
 	auto c = genC(x);
 	auto h_copy = h;
-	
+
+	// Obtain the position relative vector between the drone and the target
+	Eigen::Vector3d b = genB(0, 0).transpose()*(h - c);
+	// Obtain the velocity relative vector between the drone and the target
+	Eigen::Vector3d b_dot = genB(0, 1).transpose()*(h - c);
+
+	if(b_dot.dot(b) <= 0 || b_dot.norm() < thresh){
+		lambda_0 = 0.7;
+	}
+	else lambda_0 = 0;
+
 	// Add an offest of the desired height
 	h_copy(n_dim*n_coeff - 1) = drone_height;
 	
