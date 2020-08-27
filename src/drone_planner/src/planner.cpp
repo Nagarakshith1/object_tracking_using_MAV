@@ -19,9 +19,10 @@ double lambda_1;					// Velocity weighting factor in the cost function
 double lambda_3;					// Jerk weighting factor in the cost function
 
 const double gravity  = 9.81;
+double max_accel;
 const int n_vis_normals = 4; 		// The number of normals for the visual constraints
 std::vector<double> fixed_c(6);		// The vector to store the known coefficients 
-const double thresh = 0.02;
+const double thresh = 0.05;
 Traj drone_tr; 
 
 Eigen::MatrixXd normals; 			// Normals of the planes of the pyramid formed by the camera
@@ -133,9 +134,9 @@ double objective_function(const std::vector<double> &x, std::vector<double> &gra
 	Eigen::Vector3d b_dot = genB(0, 1).transpose()*(h - c);
 
 	if(b_dot.dot(b) <= 0 || b_dot.norm() < thresh){
-		lambda_0 = 0.3;
+		lambda_0 = 0.5;
 	}
-	else lambda_0 = 0;
+	else lambda_0 = 0.3;
 
 	// Add an offest of the desired height
 	h_copy(n_dim*n_coeff - 1) = drone_height;
@@ -148,12 +149,37 @@ double objective_function(const std::vector<double> &x, std::vector<double> &gra
 
   if (!grad.empty()) {
   	auto grad_eig = genX(2 * c.transpose() * Q_net + f.transpose());
-  	for(int i = 0; i < grad.size(); i++){
+  	for(int i = 0; i < grad.size(); i++) {
   		grad[i] = grad_eig(i);
   	}
   }
   return J(0,0);
 }
+
+void thrust_constraints(unsigned m, double *result, unsigned n, const double* x, double* grad, void* f_data) {
+	int iter = m;
+	auto c = genC(std::vector<double>(x,x + n_sol));
+	Eigen::Vector3d g = -gravity * Eigen::Vector3d::UnitZ();
+	double rhs = max_accel * max_accel - gravity * gravity;
+
+	for(int i = 0; i < iter; i++) {
+		// Create the time instances to add the constraints at
+		double t = (i + 1.0) / iter * planning_horizon;
+		auto B = genB(t,2);
+		double equation = (c.transpose()*(B * B.transpose()) * c + 2 * g.transpose() * B.transpose() * c)(0,0) - rhs;
+		result[i] = equation;
+
+		if(grad) {
+			auto grad_eig = genX(2*(c.transpose() * (B * B.transpose()) + g.transpose() * B.transpose()));
+			for(int k = 0; k < n_sol ; k++) {
+  				grad[i * n_sol + k] = grad_eig(k);
+  			}
+		}
+
+	}
+}
+
+
 
 /**
 	The vision constraints to be added
@@ -253,6 +279,10 @@ void planner_callback(const obj_traj_est::traj_msg &msg) {
 	std::vector<double> vis_tol(10 * n_vis_normals,1e-2);
 	opt.add_inequality_mconstraint(vision_constraints, NULL, vis_tol);
 	
+	// Set thrust constraints
+	std::vector<double> thrust_tol(10, 1e-2);
+	opt.add_inequality_mconstraint(thrust_constraints, NULL, thrust_tol);
+
 	// Peform the optimization
 	result = opt.optimize(sol_vec, objective_value);
 	auto drone_coeff = sol_vec_to_coeff(sol_vec);
@@ -309,6 +339,7 @@ int main(int argc, char **argv)
 	n.param("lambda_3", lambda_3, 0.0);
 	n.param("x_fov", x_fov, M_PI / 2);
 	n.param("y_fov", y_fov, M_PI  / 2);
+	n.param("max_accel", max_accel, 2.5 * gravity);
 
 	n_coeff = n_order + 1;
     n_sol = n_dim * (n_coeff - 2);
