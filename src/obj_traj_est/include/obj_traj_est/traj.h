@@ -19,10 +19,12 @@ Eigen::MatrixXd _coefficients;			// Coefficients of the polynomials
 Eigen::MatrixXd _deriv_1_coeff;			// Coefficients of the first derivative polynomial
 Eigen::MatrixXd _deriv_2_coeff;			// Coefficients of the second derivative polynomial
 Eigen::MatrixXd _deriv_3_coeff;			// Coefficients of the third derivative polynomial
+Eigen::MatrixXd _deriv_4_coeff;			// Coefficients of the fourth derivative polynomial
 Eigen::VectorXd _power_vec;				// Powers of the polynomial
 Eigen::VectorXd _power_vec_deriv_1;		// Powers of the first derivative polynomial
 Eigen::VectorXd _power_vec_deriv_2;		// Powers of the second derivative polynomial
 Eigen::VectorXd _power_vec_deriv_3;		// Powers of the third derivative polynomial
+Eigen::VectorXd _power_vec_deriv_4;		// Powers of the third derivative polynomial
 
 
 

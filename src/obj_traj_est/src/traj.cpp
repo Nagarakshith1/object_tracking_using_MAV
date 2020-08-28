@@ -19,14 +19,19 @@ Traj::Traj (const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &c, float 
 	_power_vec_deriv_3.conservativeResize(_n_order + 1,1);
 	_power_vec_deriv_3 << Eigen::VectorXd::LinSpaced(_n_order - 2,_n_order - 3,0),0,0,0;
 
+	_power_vec_deriv_4.conservativeResize(_n_order + 1,1);
+	_power_vec_deriv_4 << Eigen::VectorXd::LinSpaced(_n_order - 3,_n_order - 4,0),0,0,0,0;
+
 	Eigen::MatrixXd deriv_1 = Eigen::MatrixXd::Zero(_n_order + 1,_n_order + 1);
 	deriv_1.bottomLeftCorner(_n_order,_n_order) = _power_vec.topLeftCorner(_n_order,1).asDiagonal();
 	auto deriv_2 = deriv_1 * deriv_1;
 	auto deriv_3 = deriv_1 * deriv_2;
+	auto deriv_4 = deriv_1 * deriv_3;
 
 	_deriv_1_coeff = deriv_1.colwise().sum().transpose();
 	_deriv_2_coeff = deriv_2.colwise().sum().transpose();
-	_deriv_3_coeff = deriv_3.colwise().sum().transpose(); 		
+	_deriv_3_coeff = deriv_3.colwise().sum().transpose();
+	_deriv_4_coeff = deriv_4.colwise().sum().transpose(); 		
 }
  
 void Traj::set_coefficients(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &c) {
@@ -71,6 +76,8 @@ Eigen::VectorXd Traj::gen_basis(double time, int order) {
 		case 2: return(_deriv_2_coeff.array() * Eigen::pow(time_vec.array(),_power_vec_deriv_2.array()));
 				break;
 		case 3: return (_deriv_3_coeff.array() * Eigen::pow(time_vec.array(),_power_vec_deriv_3.array()));
+				break;
+		case 4: return (_deriv_4_coeff.array() * Eigen::pow(time_vec.array(),_power_vec_deriv_4.array()));
 				break;
 	}
 }

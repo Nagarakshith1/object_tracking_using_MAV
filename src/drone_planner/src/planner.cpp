@@ -14,12 +14,14 @@ int n_coeff;						// Number of coefficients in the polynomial
 int n_sol; 							// Number of coefficients of the polynomial for the solver
 double drone_height;				// The minimum height at which the drone has to fly.
 
+double weights = 0.25;				// Weight of the robot
 double lambda_0;					// Position weighting factor in the cost function
 double lambda_1;					// Velocity weighting factor in the cost function
 double lambda_3;					// Jerk weighting factor in the cost function
 
 const double gravity  = 9.81;
 double max_accel;
+double max_angacc;
 const int n_vis_normals = 4; 		// The number of normals for the visual constraints
 std::vector<double> fixed_c(6);		// The vector to store the known coefficients 
 const double thresh = 0.05;
@@ -157,8 +159,10 @@ double objective_function(const std::vector<double> &x, std::vector<double> &gra
 }
 
 void thrust_constraints(unsigned m, double *result, unsigned n, const double* x, double* grad, void* f_data) {
+
 	int iter = m;
 	auto c = genC(std::vector<double>(x,x + n_sol));
+
 	Eigen::Vector3d g = -gravity * Eigen::Vector3d::UnitZ();
 	double rhs = max_accel * max_accel - gravity * gravity;
 
@@ -180,6 +184,77 @@ void thrust_constraints(unsigned m, double *result, unsigned n, const double* x,
 }
 
 
+void angular_moment_constraints(unsigned m, double *result, unsigned n, const double* x, double* grad, void* f_data) {
+
+	int iter = m/4;
+	auto c = genC(std::vector<double>(x,x + n_sol));
+	Eigen::Vector3d g = gravity * Eigen::Vector3d::UnitZ();
+	Eigen::Vector3d bc;
+	bc << 0,1,0;
+
+	for(int i = 0; i < iter; i++) {
+		// Create the time instances to add the constraints at
+		double t = (i + 1.0) / iter * planning_horizon;
+
+		Eigen::MatrixXd B_2 = genB(t,2);
+		Eigen::MatrixXd B_3 = genB(t,3);
+		Eigen::MatrixXd B_4 = genB(t,4);
+
+		Eigen::MatrixXd x_2t = B_2.transpose()*c;
+		Eigen::MatrixXd x_3t = B_3.transpose()*c;
+		Eigen::MatrixXd x_4t = B_4.transpose()*c;
+
+		Eigen::Vector3d x_2 = Eigen::Map<Eigen::Vector3d>(x_2t.data(),n_dim);
+		Eigen::Vector3d x_3 = Eigen::Map<Eigen::Vector3d>(x_3t.data(),n_dim);
+		Eigen::Vector3d x_4 = Eigen::Map<Eigen::Vector3d>(x_4t.data(),n_dim);
+
+		Eigen::Vector3d b3 = (x_2 + g).normalized();
+		Eigen::Vector3d b2 = b3.cross(bc).normalized();
+		Eigen::Vector3d b1 = b2.cross(b3).normalized();
+
+		double f = m*((x_2 + g).norm());
+		double f_dot = m*(b3.dot(x_3));
+
+		double omega_1 = -(m/f)*b2.dot(x_3);
+		double omega_2 = (m/f)*b1.dot(x_3);
+		double omega_3 = -b2(2)*omega_2/b3(2);
+
+		auto omegadot_1 = -(m/f)*b2.dot(x_4) - 2*(f_dot/f)*omega_1 + omega_3*omega_2;
+		auto omegadot_2 = (m/f)*b1.dot(x_4) - 2*(f_dot/f)*omega_2 - omega_3*omega_1;
+		
+		result[i*4 + 0] = omegadot_1 - max_angacc;
+		result[i*4 + 1] = -omegadot_1 - max_angacc;
+		result[i*4 + 2] = omegadot_2 - max_angacc;
+		result[i*4 + 3] = -omegadot_2 - max_angacc; 
+
+
+		if(grad) {
+
+			Eigen::MatrixXd grad_omega1 = -(m/f) * b2.transpose() * B_3.transpose();
+			// gen_B dimension:n_dim * n_coeff,n_dim, b2 - (3,1)
+			// grad_omega dim = (1, n_dim * n_coeff)
+			Eigen::MatrixXd grad_omega2 = (m/f) * b1.transpose() * B_3.transpose();
+			
+			Eigen::MatrixXd grad_omegadot1 = -(m/f) * (b2.transpose() *  B_4.transpose()) - 2*(f_dot/f)*grad_omega1;
+			
+			Eigen::MatrixXd grad_omegadot2 = (m/f) * (b1.transpose() * B_4.transpose()) - 2*(f_dot/f)*grad_omega2; 
+		
+			auto grad_omegadot1_opt = genX(grad_omegadot1);
+			auto grad_omegadot2_opt = genX(grad_omegadot2);
+
+			for(int j = 0; j < n_sol; j++){
+
+				grad[ i*(n_sol*4) + j ] = grad_omegadot1_opt(j);
+				grad[ i*(n_sol*4) + (j + n_sol) ] = -grad_omegadot1_opt(j);
+				grad[ i*(n_sol*4) + (j + 2*n_sol) ] = grad_omegadot2_opt(j);
+				grad[ i*(n_sol*4) + (j + 3*n_sol) ] = -grad_omegadot2_opt(j);
+
+			}
+		}
+
+	}
+}
+
 
 /**
 	The vision constraints to be added
@@ -190,6 +265,7 @@ void vision_constraints(unsigned m, double *result, unsigned n, const double* x,
 	auto c = genC(std::vector<double>(x,x + n_sol));
 	
 	for(int i = 0; i < iter; i++){
+
 		// Create the time instances to add the constraints at
 		double t = (i + 1.0) / iter * planning_horizon;
 		
@@ -199,10 +275,13 @@ void vision_constraints(unsigned m, double *result, unsigned n, const double* x,
 		// Calculate the axis and the angle about which the normals have to be rotated
 		auto e3 = Eigen::Vector3d::UnitZ();
 		double angle = std::acos(e3.transpose() * (- b / b.norm()));
+
     	Eigen::Vector3d axis = e3.cross(-b);
     	axis.normalize();
+
     	Eigen::Matrix3d R;
     	R = Eigen::AngleAxisd(angle,axis).toRotationMatrix();
+
     	Eigen::MatrixXd rotated_normals = R * (-normals);
     	Eigen::Vector3d vertex = -gravity * e3;
     	
@@ -210,22 +289,28 @@ void vision_constraints(unsigned m, double *result, unsigned n, const double* x,
     	Eigen::MatrixXd ineq = (genB(t, 2).transpose() * c - vertex).transpose() * rotated_normals;
     	
     	for(int j = 0; j < n_vis_normals; j++) {
+
     		result[i * n_vis_normals + j] = ineq(j);
     	}
 
 	    if(grad) {	
+
 	    	Eigen::MatrixXd grad_c = rotated_normals.transpose() * genB(t, 2).transpose();
 	    	Eigen::MatrixXd grad_x = Eigen::MatrixXd::Zero(n_vis_normals,n_sol * n_dim);
 	    	
 			for(int j = 0; j < n_vis_normals; j++){
+
 				grad_x.row(j) = genX(grad_c.row(j)).transpose();
+
 			}
 			
 			for(int l = 0; l < n_vis_normals; l++){
+
 				int m = i * n_vis_normals + l;
 				for(int j = 0; j < n_sol; j++){
 					grad[m * n_sol + j] = grad_x(l,j);
 				}
+
 			}
 	    }
 	}
@@ -282,6 +367,10 @@ void planner_callback(const obj_traj_est::traj_msg &msg) {
 	// Set thrust constraints
 	std::vector<double> thrust_tol(10, 1e-2);
 	opt.add_inequality_mconstraint(thrust_constraints, NULL, thrust_tol);
+
+	// Set angular constraints
+	std::vector<double> angular_tol( 10*(n_dim + 1), 1e-2 );
+	opt.add_inequality_mconstraint(angular_moment_constraints, NULL, thrust_tol);
 
 	// Peform the optimization
 	result = opt.optimize(sol_vec, objective_value);
@@ -340,6 +429,7 @@ int main(int argc, char **argv)
 	n.param("x_fov", x_fov, M_PI / 2);
 	n.param("y_fov", y_fov, M_PI  / 2);
 	n.param("max_accel", max_accel, 2.5 * gravity);
+	n.param("max_angacc", max_angacc, 30.0);
 
 	n_coeff = n_order + 1;
     n_sol = n_dim * (n_coeff - 2);
