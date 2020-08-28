@@ -190,7 +190,7 @@ void angular_moment_constraints(unsigned m, double *result, unsigned n, const do
 	auto c = genC(std::vector<double>(x,x + n_sol));
 	Eigen::Vector3d g = gravity * Eigen::Vector3d::UnitZ();
 	Eigen::Vector3d bc;
-	bc << 0,1,0;
+	bc << 1,0,0;
 
 	for(int i = 0; i < iter; i++) {
 		// Create the time instances to add the constraints at
