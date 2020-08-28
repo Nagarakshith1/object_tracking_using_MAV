@@ -319,11 +319,11 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "drone_planner");
 	ros::NodeHandle n("~");
 	
-	ros::Subscriber drone_odom_sub = n.subscribe("/drone/odom", 1, &drone_odom_callback);
-	ros::Subscriber obj_traj_sub = n.subscribe("/obj_traj_coeff", 1, &planner_callback);
+	ros::Subscriber drone_odom_sub = n.subscribe("odom", 1, &drone_odom_callback);
+	ros::Subscriber obj_traj_sub = n.subscribe("obj_traj_coeff", 1, &planner_callback);
 	
-	drone_vel_pub = n.advertise<geometry_msgs::Twist>("/drone/cmd_vel", 1);
-	drone_vis_pub = n.advertise<visualization_msgs::Marker>("/drone_traj_vis", 1);
+	drone_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+	drone_vis_pub = n.advertise<visualization_msgs::Marker>("drone_traj_vis", 1);
 	
 	// The field of view of the camera
 	double x_fov;

@@ -1,0 +1,127 @@
+<launch>
+<arg name = "drone_height" default = "1"/>
+<arg name = "paused" default = "false"/>
+<arg name = "use_sim_time" default = "true"/>
+<arg name = "gui" default = "true"/>
+<arg name = "headless" default = "false"/>
+<arg name = "debug" default = "false"/>
+
+<include file = "$(find gazebo_ros)/launch/empty_world.launch">
+<arg name = "debug" value = "$(arg debug)"/>
+<arg name = "gui" value = "$(arg gui)"/>
+<arg name = "paused" value = "$(arg paused)"/>
+<arg name = "use_sim_time" value = "$(arg use_sim_time)"/>
+<arg name = "headless" value = "$(arg headless)"/>
+</include>
+
+<param name = "drone_description" command = "$(find xacro)/xacro '$(find simulator)/urdf/camera.xacro' drone_height:=$(arg drone_height)"/>
+<param name = "april_tag_description" command = "$(find xacro)/xacro '$(find simulator)/urdf/april_tag.xacro'"/>
+
+<group ns = "april_tag">
+	<param name = "robot_description_april" command = "$(find xacro)/xacro '$(find simulator)/urdf/april_tag.xacro'"/>
+	<node name = "urdf_spawner" pkg = "gazebo_ros" type = "spawn_model" respawn = "false" output = "screen" args = "-urdf -model april_tag -param robot_description_april"/>
+	<!-- <node name = "move_target" pkg = "simulator" type = "move_target" respawn = "false" output = "screen"/> -->
+	<node name = "obj_traj" pkg = "obj_traj_est" type = "obj_traj" respawn = "false" output = "screen">
+		<remap from = "~odom" to = "/ddk/ground_truth/odom"/>
+		<remap from = "~apriltag_poses" to = "/ddk/dfc_camera/apriltag_pose_estimator/apriltag_poses"/>
+		<remap from = "~obj_traj_coeff" to = "/obj_traj_coeff"/>
+		<remap from = "~obj_traj_vis" to = "/obj_traj_vis"/>
+		<param name = "planning_horizon" value = "3.0"/>
+		<param name = "planning_rate" value = "20"/>
+		<param name = "n_obs" value = "20"/>
+		<param name = "p_order" value = "2"/>
+		<param name = "odom_buffer_size" value = "5"/>
+	</node>
+</group>
+
+<!-- <group ns = "drone">
+	<param name = "robot_description_drone" command = "$(find xacro)/xacro '$(find simulator)/urdf/camera.xacro' drone_height:=$(arg drone_height)" />
+	<node name = "urdf_spawner" pkg = "gazebo_ros" type = "spawn_model" respawn = "false" output = "screen" args = "-urdf -model drone -param robot_description_drone"/> -->
+	<!-- <node name="move_drone" pkg="simulator" type="move_drone" respawn="false" output="screen"/> -->
+	<!-- <node name = "planner" pkg = "drone_planner" type = "planner" respawn = "false" output = "screen">
+		<remap from = "~odom" to = "/drone/odom"/>
+		<remap from = "~obj_traj_coeff" to = "/obj_traj_coeff"/>
+		<remap from = "~cmd_vel" to = "/drone/cmd_vel"/>
+		<remap from = "~drone_traj_vis" to = "/drone_traj_vis"/>
+
+		<param name = "planning_horizon" value = "3.0"/>
+		<param name = "drone_height" value = "$(arg drone_height)"/>
+		<param name = "planning_rate" value = "20"/>
+	</node>
+</group> -->
+
+<!-- <node type = "rviz" name = "rviz" pkg = "rviz" args = "-d $(find simulator)/rviz/simulation_config.rviz" /> -->
+
+<node name = "image_view" pkg = "image_view" type = "image_view" output = "screen" respawn = "false">
+	<remap from = "image" to = "/ddk/dfc_camera/image_raw"/>
+	<!-- <remap from = "image" to = "/dragon_ddk/dfc_camera/image_raw"/> -->
+</node>
+
+<include file = "$(find apriltag_ros)/launch/pose_estimator.launch">
+	<arg name = "camera" value = "/ddk/dfc_camera"/>
+</include>
+
+<!-- <node pkg="tf" type="static_transform_publisher" name="broadcaster" args="0 0 0 0 0 0 1 world odom 100" />
+<node pkg = "tf" type = "static_transform_publisher" name = "drone_broadcaster" args = "0 0 $(arg drone_height) 0 0 0 1 odom drone_odom 100" /> -->
+
+
+<!-- <arg name="x" default="0.0"/>
+<arg name="y" default="0.0"/>
+<arg name="z" default="0.1"/>
+<arg name="Y" default="0.0"/>
+
+<group ns="ddk">
+<arg name="model" default="$(find simulator)/urdf/dragon_ddk/dragon_ddk.gazebo.xacro"/>
+<param name="robot_description" command="xacro '$(arg model)' "/>
+<node name="spawn_robot"
+  pkg="gazebo_ros"
+  type="spawn_model"
+  respawn="false"
+  args="-param robot_description
+  -urdf
+  -x $(arg x)
+  -y $(arg y)
+  -z $(arg drone_height)
+  -Y $(arg Y)
+  -model dragon_ddk"
+  output="screen"/>
+ </group> -->
+<include file = "$(find mrsl_quadrotor_launch)/launch/spawn.launch">
+	<arg name = "mav_type" value = "dragon_ddk"/>
+	<arg name = "mav_name" value = "ddk"/>
+	<arg name="z" default="0.1"/>
+	<arg name="Y" default="0.0"/>
+</include>
+
+<include file = "$(find mrsl_quadrotor_launch)/launch/controller.launch">
+	<arg name = "mav_type" value = "dragon_ddk"/>
+	<arg name = "mav_name" value = "ddk"/>
+	<arg name = "odom_topic" value = "ground_truth/odom"/>
+	<arg name = "mass" value = "0.25"/>
+</include>
+
+<node pkg = "kr_trackers" type = "twist_to_velocity_goal.py" name = "twist_to_velocity_goal" output = "screen" respawn = "false" ns="ddk"/>
+
+<node name = "planner" pkg = "drone_planner" type = "planner" respawn = "false" output = "screen">
+	<remap from = "~odom" to = "/ddk/ground_truth/odom"/>
+	<remap from = "~obj_traj_coeff" to = "/obj_traj_coeff"/>
+	<remap from = "~cmd_vel" to = "/ddk/cmd_vel"/>
+	<remap from = "~drone_traj_vis" to = "/drone_traj_vis"/>
+
+	<param name = "planning_horizon" value = "3.0"/>
+	<param name = "drone_height" value = "$(arg drone_height)"/>
+	<param name = "planning_rate" value = "20"/>
+</node>
+<node pkg = "rosservice" type = "rosservice" name = "motors_on" output = "screen" args = "call --wait /ddk/mav_services/motors 1"/>
+<node pkg = "rosservice" type = "rosservice" name = "takeoff" output = "screen" args = "call --wait /ddk/mav_services/takeoff"/>
+</launch>
+
+
+
+
+
+
+
+
+
+
