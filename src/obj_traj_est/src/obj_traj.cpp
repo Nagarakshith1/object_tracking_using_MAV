@@ -187,11 +187,11 @@ int main(int argc, char **argv){
 	ros::init(argc, argv, "obj_traj");
 	ros::NodeHandle n("~");
 
-	ros::Subscriber drone_odom_sub = n.subscribe("/drone/odom", 1, &drone_odom_callback);
-	ros::Subscriber april_pose_odom = n.subscribe("/apriltag_pose_estimator/apriltag_poses", 1, &apriltag_pose_callback);
+	ros::Subscriber drone_odom_sub = n.subscribe("odom", 1, &drone_odom_callback);
+	ros::Subscriber april_pose_odom = n.subscribe("apriltag_poses", 1, &apriltag_pose_callback);
 
-	obj_traj_pub = n.advertise<obj_traj_est::traj_msg>("/obj_traj_coeff", 1);
-	obj_vis_pub = n.advertise<visualization_msgs::Marker>("/obj_traj_vis", 1);
+	obj_traj_pub = n.advertise<obj_traj_est::traj_msg>("obj_traj_coeff", 1);
+	obj_vis_pub = n.advertise<visualization_msgs::Marker>("obj_traj_vis", 1);
 	
 	int planning_rate;
 

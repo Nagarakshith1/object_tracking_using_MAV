@@ -1,6 +1,6 @@
 <launch>
   <arg name="camera" default="camera"/>
-  <arg name="image" default="drone/camera/image_raw"/>
+  <arg name="image" default="image_raw"/>
   <arg name="border_size" default="2"/>
 
   <include file="$(find apriltag_ros)/launch/detector.launch">
@@ -10,10 +10,9 @@
   </include>
 
   <node pkg="apriltag_ros" name="apriltag_pose_estimator"
-    type="apriltag_pose_estimator" output="screen">
-     <!-- ns="$(arg camera)"> -->
+    type="apriltag_pose_estimator" output="screen" ns="$(arg camera)">
     <remap from="~apriltags" to="tags"/>
-    <remap from="~camera_info" to="/drone/camera/camera_info"/>
+    <remap from="~camera_info" to="camera_info"/>
     <remap from="~transform" to="transform_cam_apriltag"/>
     <param name="broadcast_tf" type="bool" value="true"/>
     <param name="auto_disconnect" type="bool" value="false"/>

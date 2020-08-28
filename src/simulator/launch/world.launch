@@ -21,8 +21,11 @@
 	<param name = "robot_description_april" command = "$(find xacro)/xacro '$(find simulator)/urdf/april_tag.xacro'"/>
 	<node name = "urdf_spawner" pkg = "gazebo_ros" type = "spawn_model" respawn = "false" output = "screen" args = "-urdf -model april_tag -param robot_description_april"/>
 	<node name = "move_target" pkg = "simulator" type = "move_target" respawn = "false" output = "screen"/>
-	<!-- <node name = "teleop_twist_keyboard" pkg = "teleop_twist_keyboard_cpp" type = "teleop_twist_keyboard" respawn = "false" output = "screen"/> -->
 	<node name = "obj_traj" pkg = "obj_traj_est" type = "obj_traj" respawn = "false" output = "screen">
+		<remap from = "~odom" to = "/drone/odom"/>
+		<remap from = "~apriltag_poses" to = "/drone/camera/apriltag_pose_estimator/apriltag_poses"/>
+		<remap from = "~obj_traj_coeff" to = "/obj_traj_coeff"/>
+		<remap from = "~obj_traj_vis" to = "/obj_traj_vis"/>
 		<param name = "planning_horizon" value = "3.0"/>
 		<param name = "planning_rate" value = "20"/>
 		<param name = "n_obs" value = "20"/>
@@ -36,6 +39,11 @@
 	<node name = "urdf_spawner" pkg = "gazebo_ros" type = "spawn_model" respawn = "false" output = "screen" args = "-urdf -model drone -param robot_description_drone"/>
 	<!-- <node name="move_drone" pkg="simulator" type="move_drone" respawn="false" output="screen"/> -->
 	<node name = "planner" pkg = "drone_planner" type = "planner" respawn = "false" output = "screen">
+		<remap from = "~odom" to = "/drone/odom"/>
+		<remap from = "~obj_traj_coeff" to = "/obj_traj_coeff"/>
+		<remap from = "~cmd_vel" to = "/drone/cmd_vel"/>
+		<remap from = "~drone_traj_vis" to = "/drone_traj_vis"/>
+
 		<param name = "planning_horizon" value = "3.0"/>
 		<param name = "drone_height" value = "$(arg drone_height)"/>
 		<param name = "planning_rate" value = "20"/>
@@ -47,10 +55,15 @@
 <node name = "image_view" pkg = "image_view" type = "image_view" output = "screen" respawn = "false">
 	<remap from = "image" to = "/drone/camera/image_raw"/>
 </node>
-<include file = "$(find apriltag_ros)/launch/pose_estimator.launch"/>
 
-<node pkg="tf" type="static_transform_publisher" name="broadcaster" args="0 0 0 0 0 0 1 world odom 100" />
+<include file = "$(find apriltag_ros)/launch/pose_estimator.launch">
+	<arg name = "camera" value = "/drone/camera"/>
+</include>
+
+<node pkg = "tf" type = "static_transform_publisher" name = "broadcaster" args = "0 0 0 0 0 0 1 world odom 100" />
 <node pkg = "tf" type = "static_transform_publisher" name = "drone_broadcaster" args = "0 0 $(arg drone_height) 0 0 0 1 odom drone_odom 100" />
+
+
 </launch>
 
 
