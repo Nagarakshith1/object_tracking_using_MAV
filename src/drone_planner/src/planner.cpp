@@ -186,11 +186,11 @@ void thrust_constraints(unsigned m, double *result, unsigned n, const double* x,
 
 void angular_moment_constraints(unsigned m, double *result, unsigned n, const double* x, double* grad, void* f_data) {
 
-	int iter = m;
+	int iter = m/4;
 	auto c = genC(std::vector<double>(x,x + n_sol));
 	Eigen::Vector3d g = gravity * Eigen::Vector3d::UnitZ();
 	Eigen::Vector3d bc;
-	bc << 1,0,0;
+	bc << 0,1,0;
 
 	for(int i = 0; i < iter; i++) {
 		// Create the time instances to add the constraints at
@@ -429,7 +429,7 @@ int main(int argc, char **argv)
 	n.param("x_fov", x_fov, M_PI / 2);
 	n.param("y_fov", y_fov, M_PI  / 2);
 	n.param("max_accel", max_accel, 2.5 * gravity);
-	n.param("max_angacc", max_angacc, 2.5);
+	n.param("max_angacc", max_angacc, 30.0);
 
 	n_coeff = n_order + 1;
     n_sol = n_dim * (n_coeff - 2);
