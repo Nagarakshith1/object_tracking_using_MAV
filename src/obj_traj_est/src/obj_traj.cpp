@@ -14,6 +14,7 @@ Eigen::Matrix<double,3,3> R_drone;
 
 // Rotation matrix - drone to camera
 Eigen::Matrix3d R_drone_cam;
+std::vector<double> R_drone_cam_vect;
 
 // Pose of the target in drone frame
 Eigen::Matrix<double,3,1> t_obj_drone;
@@ -201,13 +202,14 @@ int main(int argc, char **argv){
 	n.param("drone_p_order", drone_p_order, 7);
 	n.param("planning_rate", planning_rate, 20);
 	n.param("planning_horizon", planning_horizon, 3.0);
+	n.getParam("R_drone_cam_vect", R_drone_cam_vect);
 
 	observations = Eigen::MatrixXd::Zero(n_obs,4);
 	tr = Traj(Eigen::MatrixXd::Zero(drone_p_order + 1,3),planning_horizon);
 
-	R_drone_cam<< 1, 0, 0,
-			      0,-1, 0,
-	    		  0, 0,-1;
+	R_drone_cam << R_drone_cam_vect[0], R_drone_cam_vect[1], R_drone_cam_vect[2],
+				   R_drone_cam_vect[3], R_drone_cam_vect[4], R_drone_cam_vect[5],
+				   R_drone_cam_vect[6], R_drone_cam_vect[7], R_drone_cam_vect[8];
 
 	ros::Rate replan_rate(planning_rate);
 

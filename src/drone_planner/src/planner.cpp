@@ -59,13 +59,13 @@ void drone_odom_callback(const nav_msgs::Odometry &msg) {
 	drone_state.y_pos = msg.pose.pose.position.y;
 
 	// TODO: get the actual drone height
-	drone_state.z_pos = drone_height; 
+	drone_state.z_pos = msg.pose.pose.position.z; 
 
 	drone_state.x_vel = msg.twist.twist.linear.x;
 	drone_state.y_vel = msg.twist.twist.linear.y;
 	
 	// TODO: get the actual velocity in z-axis
-	drone_state.z_vel = 0;
+	drone_state.z_vel = msg.twist.twist.linear.z;
 }
 
 /**
@@ -231,8 +231,7 @@ void angular_moment_constraints(unsigned m, double *result, unsigned n, const do
 		if(grad) {
 
 			Eigen::MatrixXd grad_omega1 = -(m/f) * b2.transpose() * B_3.transpose();
-			// gen_B dimension:n_dim * n_coeff,n_dim, b2 - (3,1)
-			// grad_omega dim = (1, n_dim * n_coeff)
+
 			Eigen::MatrixXd grad_omega2 = (m/f) * b1.transpose() * B_3.transpose();
 			
 			Eigen::MatrixXd grad_omegadot1 = -(m/f) * (b2.transpose() *  B_4.transpose()) - 2*(f_dot/f)*grad_omega1;

@@ -1,5 +1,5 @@
 <launch>
-<arg name = "drone_height" default = "1"/>
+<arg name = "drone_height" default = "2"/>
 <arg name = "paused" default = "false"/>
 <arg name = "use_sim_time" default = "true"/>
 <arg name = "gui" default = "true"/>
@@ -16,21 +16,17 @@
 
 <param name = "drone_description" command = "$(find xacro)/xacro '$(find simulator)/urdf/camera.xacro' drone_height:=$(arg drone_height)"/>
 <param name = "april_tag_description" command = "$(find xacro)/xacro '$(find simulator)/urdf/april_tag.xacro'"/>
-
+<node pkg = "rosservice" type = "rosservice" name = "motors_on" output = "screen" args = "call --wait /ddk/mav_services/motors 1"/>
 <group ns = "april_tag">
 	<param name = "robot_description_april" command = "$(find xacro)/xacro '$(find simulator)/urdf/april_tag.xacro'"/>
 	<node name = "urdf_spawner" pkg = "gazebo_ros" type = "spawn_model" respawn = "false" output = "screen" args = "-urdf -model april_tag -param robot_description_april"/>
-	<!-- <node name = "move_target" pkg = "simulator" type = "move_target" respawn = "false" output = "screen"/> -->
+	<node name = "move_target" pkg = "simulator" type = "move_target" respawn = "false" output = "screen"/>
 	<node name = "obj_traj" pkg = "obj_traj_est" type = "obj_traj" respawn = "false" output = "screen">
 		<remap from = "~odom" to = "/ddk/ground_truth/odom"/>
 		<remap from = "~apriltag_poses" to = "/ddk/dfc_camera/apriltag_pose_estimator/apriltag_poses"/>
 		<remap from = "~obj_traj_coeff" to = "/obj_traj_coeff"/>
 		<remap from = "~obj_traj_vis" to = "/obj_traj_vis"/>
-		<param name = "planning_horizon" value = "3.0"/>
-		<param name = "planning_rate" value = "20"/>
-		<param name = "n_obs" value = "20"/>
-		<param name = "p_order" value = "2"/>
-		<param name = "odom_buffer_size" value = "5"/>
+		<rosparam command="load" file="$(find obj_traj_est)/config/params.yaml" />
 	</node>
 </group>
 
@@ -112,7 +108,7 @@
 	<param name = "drone_height" value = "$(arg drone_height)"/>
 	<param name = "planning_rate" value = "20"/>
 </node>
-<node pkg = "rosservice" type = "rosservice" name = "motors_on" output = "screen" args = "call --wait /ddk/mav_services/motors 1"/>
+
 <node pkg = "rosservice" type = "rosservice" name = "takeoff" output = "screen" args = "call --wait /ddk/mav_services/takeoff"/>
 </launch>
 
