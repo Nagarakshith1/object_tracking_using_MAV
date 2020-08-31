@@ -14,15 +14,17 @@ int n_coeff;						// Number of coefficients in the polynomial
 int n_sol; 							// Number of coefficients of the polynomial for the solver
 double drone_height;				// The minimum height at which the drone has to fly.
 
-double weights = 0.25;				// Weight of the robot
+double weights;						// Weight of the robot
 double lambda_0;					// Position weighting factor in the cost function
 double lambda_1;					// Velocity weighting factor in the cost function
 double lambda_3;					// Jerk weighting factor in the cost function
 
 const double gravity  = 9.81;
+double max_accel_coeff;
 double max_accel;
 double max_angacc;
 const int n_vis_normals = 4; 		// The number of normals for the visual constraints
+const int n_moment_constrains = 4;  // The number of moment constrains
 std::vector<double> fixed_c(6);		// The vector to store the known coefficients 
 const double thresh = 0.05;
 Traj drone_tr; 
@@ -41,32 +43,33 @@ struct DroneState {
 	double x_vel;
 	double y_vel;
 	double z_vel;
-} drone_state;						// Store the drone state based on the odometry msg
+} drone_state;						 // Store the drone state based on the odometry msg
 
-ros::Publisher drone_vel_pub;		// Drone velocity publisher
-ros::Publisher drone_vis_pub;		// Drone trajectory visualization publisher
+ros::Publisher drone_traj_pub;		 // Drone Trajectory publisher
+ros::Publisher drone_vis_pub;		 // Drone trajectory visualization publisher
 
-geometry_msgs::Twist twist_cmd;		// Msg for the velocity
-visualization_msgs::Marker vis_msg; // Msg for the drone trajectory visualization
+obj_traj_est::traj_msg tr_msg_drone; // Msg for traj of drone
+visualization_msgs::Marker vis_msg;  // Msg for the drone trajectory visualization
 
 /**
 	Stores the drone state based on the odometry
 	@param msg Drone odometry message
 */
-void drone_odom_callback(const nav_msgs::Odometry &msg) {
+void drone_odom_callback(const nav_msgs::Odometry::ConstPtr& msg) {
 	
-	drone_state.x_pos = msg.pose.pose.position.x;
-	drone_state.y_pos = msg.pose.pose.position.y;
+	drone_state.x_pos = msg->pose.pose.position.x;
+	drone_state.y_pos = msg->pose.pose.position.y;
 
-	// TODO: get the actual drone height
-	drone_state.z_pos = drone_height; 
 
-	drone_state.x_vel = msg.twist.twist.linear.x;
-	drone_state.y_vel = msg.twist.twist.linear.y;
+	drone_state.z_pos = msg->pose.pose.position.z; 
+
+	drone_state.x_vel = msg->twist.twist.linear.x;
+	drone_state.y_vel = msg->twist.twist.linear.y;
 	
-	// TODO: get the actual velocity in z-axis
-	drone_state.z_vel = 0;
+
+	drone_state.z_vel = msg->twist.twist.linear.z;
 }
+
 
 /**
 	Generate the full coeffecient vector
@@ -113,7 +116,7 @@ Eigen::MatrixXd genX(const Eigen::MatrixXd &c) {
 	@param order The order of the derivative of the polynomial
 */ 
 Eigen::MatrixXd genB(double t, int order) {
-	auto time_power_vec = drone_tr.gen_basis(t, order);
+	auto time_power_vec = drone_tr.gen_basis(t, order);   
 	auto zero_vec = Eigen::VectorXd::Zero(n_coeff);
 	Eigen::MatrixXd B = Eigen::MatrixXd::Zero(n_dim * n_coeff,n_dim);
 	B<< time_power_vec,       zero_vec, 	  zero_vec,
@@ -121,6 +124,7 @@ Eigen::MatrixXd genB(double t, int order) {
 		      zero_vec,       zero_vec, time_power_vec;
 	return B;
 }
+
 
 /**
 	The objective function to be minimized
@@ -158,6 +162,7 @@ double objective_function(const std::vector<double> &x, std::vector<double> &gra
   return J(0,0);
 }
 
+
 void thrust_constraints(unsigned m, double *result, unsigned n, const double* x, double* grad, void* f_data) {
 
 	int iter = m;
@@ -186,7 +191,7 @@ void thrust_constraints(unsigned m, double *result, unsigned n, const double* x,
 
 void angular_moment_constraints(unsigned m, double *result, unsigned n, const double* x, double* grad, void* f_data) {
 
-	int iter = m/4;
+	int iter = m/n_moment_constrains;
 	auto c = genC(std::vector<double>(x,x + n_sol));
 	Eigen::Vector3d g = gravity * Eigen::Vector3d::UnitZ();
 	Eigen::Vector3d bc;
@@ -222,17 +227,16 @@ void angular_moment_constraints(unsigned m, double *result, unsigned n, const do
 		auto omegadot_1 = -(m/f)*b2.dot(x_4) - 2*(f_dot/f)*omega_1 + omega_3*omega_2;
 		auto omegadot_2 = (m/f)*b1.dot(x_4) - 2*(f_dot/f)*omega_2 - omega_3*omega_1;
 		
-		result[i*4 + 0] = omegadot_1 - max_angacc;
-		result[i*4 + 1] = -omegadot_1 - max_angacc;
-		result[i*4 + 2] = omegadot_2 - max_angacc;
-		result[i*4 + 3] = -omegadot_2 - max_angacc; 
+		result[i*n_moment_constrains + 0] = omegadot_1 - max_angacc;
+		result[i*n_moment_constrains + 1] = -omegadot_1 - max_angacc;
+		result[i*n_moment_constrains + 2] = omegadot_2 - max_angacc;
+		result[i*n_moment_constrains + 3] = -omegadot_2 - max_angacc; 
 
 
 		if(grad) {
 
 			Eigen::MatrixXd grad_omega1 = -(m/f) * b2.transpose() * B_3.transpose();
-			// gen_B dimension:n_dim * n_coeff,n_dim, b2 - (3,1)
-			// grad_omega dim = (1, n_dim * n_coeff)
+
 			Eigen::MatrixXd grad_omega2 = (m/f) * b1.transpose() * B_3.transpose();
 			
 			Eigen::MatrixXd grad_omegadot1 = -(m/f) * (b2.transpose() *  B_4.transpose()) - 2*(f_dot/f)*grad_omega1;
@@ -244,10 +248,10 @@ void angular_moment_constraints(unsigned m, double *result, unsigned n, const do
 
 			for(int j = 0; j < n_sol; j++){
 
-				grad[ i*(n_sol*4) + j ] = grad_omegadot1_opt(j);
-				grad[ i*(n_sol*4) + (j + n_sol) ] = -grad_omegadot1_opt(j);
-				grad[ i*(n_sol*4) + (j + 2*n_sol) ] = grad_omegadot2_opt(j);
-				grad[ i*(n_sol*4) + (j + 3*n_sol) ] = -grad_omegadot2_opt(j);
+				grad[ i*(n_sol*n_moment_constrains) + j ] = grad_omegadot1_opt(j);
+				grad[ i*(n_sol*n_moment_constrains) + (j + n_sol) ] = -grad_omegadot1_opt(j);
+				grad[ i*(n_sol*n_moment_constrains) + (j + 2*n_sol) ] = grad_omegadot2_opt(j);
+				grad[ i*(n_sol*n_moment_constrains) + (j + 3*n_sol) ] = -grad_omegadot2_opt(j);
 
 			}
 		}
@@ -335,11 +339,11 @@ Eigen::MatrixXd sol_vec_to_coeff(std::vector<double> &sol_vec) {
 	Perform the optimization and publish the drone trajectory coefficients
 	@param msg Target trajectory coefficient message
 */ 
-void planner_callback(const obj_traj_est::traj_msg &msg) {
+void planner_callback(const obj_traj_est::traj_msg::ConstPtr &msg) {
 	// Get the target trajectory coefficient vector
-	Eigen::Map<Eigen::VectorXd> x(const_cast<double*>(msg.coeff_x.data()),msg.coeff_x.size());
-	Eigen::Map<Eigen::VectorXd> y(const_cast<double*>(msg.coeff_y.data()),msg.coeff_y.size());
-	Eigen::Map<Eigen::VectorXd> z(const_cast<double*>(msg.coeff_z.data()),msg.coeff_z.size());
+	Eigen::Map<Eigen::VectorXd> x(const_cast<double*>(msg->coeff_x.data()),msg->coeff_x.size());
+	Eigen::Map<Eigen::VectorXd> y(const_cast<double*>(msg->coeff_y.data()),msg->coeff_y.size());
+	Eigen::Map<Eigen::VectorXd> z(const_cast<double*>(msg->coeff_z.data()),msg->coeff_z.size());
 	h << x,y,z;
 	
 	// Known coefficients
@@ -369,37 +373,26 @@ void planner_callback(const obj_traj_est::traj_msg &msg) {
 	opt.add_inequality_mconstraint(thrust_constraints, NULL, thrust_tol);
 
 	// Set angular constraints
-	std::vector<double> angular_tol( 10*(n_dim + 1), 1e-2 );
+	std::vector<double> angular_tol( 10*n_moment_constrains, 1e-2 );
 	opt.add_inequality_mconstraint(angular_moment_constraints, NULL, thrust_tol);
 
-	// Peform the optimization
-	result = opt.optimize(sol_vec, objective_value);
-	auto drone_coeff = sol_vec_to_coeff(sol_vec);
-	drone_tr = Traj(drone_coeff, planning_horizon);
+	try{
 
-	// Publish the visualization message
-	vis_msg = drone_tr.to_vismsg();
-	drone_vis_pub.publish(vis_msg);
+		// Peform the optimization
+		result = opt.optimize(sol_vec, objective_value);
 
-	// Controller for the drone
-	double begin = ros::Time::now().toSec();
-	double curr = ros::Time::now().toSec();
+		auto drone_coeff = sol_vec_to_coeff(sol_vec);
+		drone_tr = Traj(drone_coeff, planning_horizon);
 
-	while(ros::ok() && curr - begin < planning_horizon - 2) {
-		curr = ros::Time::now().toSec();
-		Eigen::VectorXd t(1);
-		t(0,0) = curr-begin;
-		auto vel = drone_tr.evaluate(t,1);
-		twist_cmd.linear.x = vel(0);
-		twist_cmd.linear.y = vel(1);
-		twist_cmd.linear.z = vel(2);
+		tr_msg_drone = drone_tr.to_rosmsg();
+		drone_traj_pub.publish(tr_msg_drone);
 
-		twist_cmd.angular.x = 0;
-		twist_cmd.angular.y = 0;
-		twist_cmd.angular.z = 0;
-		drone_vel_pub.publish(twist_cmd);
+		// Publish the visualization message
+		vis_msg = drone_tr.to_vismsg();
+		drone_vis_pub.publish(vis_msg);
+	} catch(...){
+		ROS_WARN_STREAM("NLOPT ERROR Received");
 	}
-
 }
 
 
@@ -411,29 +404,32 @@ int main(int argc, char **argv)
 	ros::Subscriber drone_odom_sub = n.subscribe("odom", 1, &drone_odom_callback);
 	ros::Subscriber obj_traj_sub = n.subscribe("obj_traj_coeff", 1, &planner_callback);
 	
-	drone_vel_pub = n.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+	drone_traj_pub = n.advertise<obj_traj_est::traj_msg>("drone_traj_coeff", 1);
 	drone_vis_pub = n.advertise<visualization_msgs::Marker>("drone_traj_vis", 1);
 	
 	// The field of view of the camera
 	double x_fov;
 	double y_fov;
 
-	n.param("n_order", n_order, 7);
-	n.param("n_dim", n_dim, 3);
-	n.param("planning_horizon", planning_horizon, 3.0);
-	n.param("planning_rate", planning_rate, 20);
-	n.param("drone_height", drone_height, 3.0);
-	n.param("lambda_0", lambda_0, 0.0);
-	n.param("lambda_1", lambda_1, 0.3);
-	n.param("lambda_3", lambda_3, 0.0);
+	n.getParam("n_order", n_order);
+	n.getParam("weights", weights);
+	n.getParam("n_dim", n_dim);
+	n.getParam("planning_horizon", planning_horizon);
+	n.getParam("planning_rate", planning_rate);
+	n.getParam("drone_height", drone_height);
+	n.getParam("lambda_0", lambda_0);
+	n.getParam("lambda_1", lambda_1);
+	n.getParam("lambda_3", lambda_3);
+	n.getParam("max_accel_coeff", max_accel_coeff);
+	n.getParam("max_angacc", max_angacc);
+
 	n.param("x_fov", x_fov, M_PI / 2);
 	n.param("y_fov", y_fov, M_PI  / 2);
-	n.param("max_accel", max_accel, 2.5 * gravity);
-	n.param("max_angacc", max_angacc, 30.0);
 
 	n_coeff = n_order + 1;
     n_sol = n_dim * (n_coeff - 2);
-	
+	max_accel = max_accel_coeff*gravity; 
+
 	h = Eigen::MatrixXd::Zero(n_dim * n_coeff, 1);
 	drone_tr = Traj(Eigen::MatrixXd::Zero(n_coeff,n_dim), planning_horizon);
 	normals = Eigen::MatrixXd::Zero(3,n_vis_normals);

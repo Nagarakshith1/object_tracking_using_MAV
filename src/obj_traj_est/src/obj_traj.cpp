@@ -14,6 +14,7 @@ Eigen::Matrix<double,3,3> R_drone;
 
 // Rotation matrix - drone to camera
 Eigen::Matrix3d R_drone_cam;
+std::vector<double> R_drone_cam_vect;
 
 // Pose of the target in drone frame
 Eigen::Matrix<double,3,1> t_obj_drone;
@@ -45,14 +46,14 @@ Eigen::MatrixXd gen_basis(Eigen::MatrixXd times);
 	Stores the latest drone odom msgs in the global variable odoms.
 	@param msg The message receieved on the dron odometry topic.
 */
-void drone_odom_callback(const nav_msgs::Odometry &msg) {
+void drone_odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
 	if (odoms.size() < odom_buffer_size) {
-		odoms.push_back(msg);
+		odoms.push_back(*msg);
 	}
 	else {
 
 		odoms.pop_front();
-		odoms.push_back(msg);
+		odoms.push_back(*msg);
 	}
 }
 
@@ -60,17 +61,17 @@ void drone_odom_callback(const nav_msgs::Odometry &msg) {
 	Manipulates the observaions and performs regression to fit the polynomial
 	@param msg The april_tag pose message 
 */
-void apriltag_pose_callback(const apriltag_msgs::ApriltagPoseStamped &msg) {
+void apriltag_pose_callback(const apriltag_msgs::ApriltagPoseStamped::ConstPtr &msg) {
 	// Get the april_tag pose
-	t_obj_drone << msg.posearray.poses[0].position.x,
-			   	   msg.posearray.poses[0].position.y,
-			       msg.posearray.poses[0].position.z;
+	t_obj_drone << msg->posearray.poses[0].position.x,
+			   	   msg->posearray.poses[0].position.y,
+			       msg->posearray.poses[0].position.z;
 
 	// Keep track of the last time 
 	static double last_time = 0;
 
 	// Current time as on the msg header
-	double curr_time = msg.header.stamp.toSec();
+	double curr_time = msg->header.stamp.toSec();
 	
 	// Time difference between the current and last message
 	double dt = curr_time - last_time;
@@ -184,6 +185,7 @@ Eigen::MatrixXd gen_basis(Eigen::MatrixXd times) {
 }
 
 int main(int argc, char **argv){
+	
 	ros::init(argc, argv, "obj_traj");
 	ros::NodeHandle n("~");
 
@@ -195,19 +197,20 @@ int main(int argc, char **argv){
 	
 	int planning_rate;
 
-	n.param("odom_buffer_size", odom_buffer_size, 5);
-	n.param("n_obs", n_obs, 20);
-	n.param("p_order", p_order, 2);
-	n.param("drone_p_order", drone_p_order, 7);
-	n.param("planning_rate", planning_rate, 20);
-	n.param("planning_horizon", planning_horizon, 3.0);
+	n.getParam("odom_buffer_size", odom_buffer_size);
+	n.getParam("n_obs", n_obs);
+	n.getParam("p_order", p_order);
+	n.getParam("drone_p_order", drone_p_order);
+	n.getParam("planning_rate", planning_rate);
+	n.getParam("planning_horizon", planning_horizon);
+	n.getParam("R_drone_cam_vect", R_drone_cam_vect);
 
 	observations = Eigen::MatrixXd::Zero(n_obs,4);
 	tr = Traj(Eigen::MatrixXd::Zero(drone_p_order + 1,3),planning_horizon);
 
-	R_drone_cam<< 1, 0, 0,
-			      0,-1, 0,
-	    		  0, 0,-1;
+	R_drone_cam << R_drone_cam_vect[0], R_drone_cam_vect[1], R_drone_cam_vect[2],
+				   R_drone_cam_vect[3], R_drone_cam_vect[4], R_drone_cam_vect[5],
+				   R_drone_cam_vect[6], R_drone_cam_vect[7], R_drone_cam_vect[8];
 
 	ros::Rate replan_rate(planning_rate);
 

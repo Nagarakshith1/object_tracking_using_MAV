@@ -3,11 +3,33 @@
 
 Traj::Traj () {}
 
-Traj::Traj (const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &c, float planning_horizon) {
+Traj::Traj (const Eigen::MatrixXd &c, float planning_horizon) {
+
 	_coefficients = c;
 	_planning_horizon = planning_horizon;
 	_n_order = c.rows() - 1;
 	_n_dimensions = c.cols();
+
+	Traj::initialize();
+}
+
+
+Traj::Traj(const obj_traj_est::traj_msg& msg, float planning_horizon){
+
+	_planning_horizon = planning_horizon;
+	_n_dimensions = 3;
+	_n_order = msg.coeff_x.size();
+
+	_coefficients.resize(_n_order,_n_dimensions);
+
+	for(int i = 0; i < _n_order; i++) { _coefficients(i,0) = msg.coeff_x[i]; }
+	for(int i = 0; i < _n_order; i++) { _coefficients(i,1) = msg.coeff_y[i]; }
+	for(int i = 0; i < _n_order; i++) { _coefficients(i,2) = msg.coeff_z[i]; }
+
+	Traj::initialize();
+}
+
+void Traj::initialize(){
 
 	_power_vec = Eigen::VectorXd::LinSpaced(_n_order + 1,_n_order,0);
 	_power_vec_deriv_1.conservativeResize(_n_order + 1,1);
@@ -31,17 +53,18 @@ Traj::Traj (const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &c, float 
 	_deriv_1_coeff = deriv_1.colwise().sum().transpose();
 	_deriv_2_coeff = deriv_2.colwise().sum().transpose();
 	_deriv_3_coeff = deriv_3.colwise().sum().transpose();
-	_deriv_4_coeff = deriv_4.colwise().sum().transpose(); 		
+	_deriv_4_coeff = deriv_4.colwise().sum().transpose(); 	
+
 }
  
-void Traj::set_coefficients(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &c) {
+void Traj::set_coefficients(const Eigen::MatrixXd &c) {
 	_coefficients = c;
 }
 void Traj::set_planning_horizon(double time) {
 	_planning_horizon = time;
 }
 
-Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> Traj::get_coefficients() {
+Eigen::MatrixXd Traj::get_coefficients() {
 	return _coefficients;
 }
 
@@ -67,7 +90,9 @@ Eigen::MatrixXd Traj::evaluate(const Eigen::VectorXd &times, int order = 0) {
 	@return Basis vector
 */
 Eigen::VectorXd Traj::gen_basis(double time, int order) {
+
 	auto time_vec = time * Eigen::VectorXd::Ones(_n_order + 1);
+
 	switch(order){
 		case 0: return Eigen::pow(time_vec.array(),_power_vec.array());
 				break;
@@ -100,6 +125,7 @@ obj_traj_est::traj_msg Traj::to_rosmsg() {
 */
 
 visualization_msgs::Marker Traj::to_vismsg() {
+
 	visualization_msgs::Marker marker;
 	marker.header.frame_id = "/odom";
 	marker.header.stamp = ros::Time::now();

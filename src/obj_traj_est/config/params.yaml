@@ -1,0 +1,7 @@
+planning_horizon: 3.0
+planning_rate: 20
+n_obs: 10
+p_order: 2
+drone_p_order: 7
+odom_buffer_size: 5
+R_drone_cam_vect: [0,-1,0,-1,0,0,0,0,-1]

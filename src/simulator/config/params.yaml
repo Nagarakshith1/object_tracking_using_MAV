@@ -1,0 +1,8 @@
+init_wait_time: 10
+frequency: 20
+linear_x: 0.4
+linear_y: 0.0
+linear_z: 0.0
+twist_x: 0.0
+twist_y: 0.0
+twist_z: 0.1

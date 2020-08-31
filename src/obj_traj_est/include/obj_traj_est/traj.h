@@ -31,12 +31,19 @@ Eigen::VectorXd _power_vec_deriv_4;		// Powers of the third derivative polynomia
 public:
 	Traj();
 	Traj(const Eigen::MatrixXd &c, float planning_horizon);
+	Traj(const obj_traj_est::traj_msg &msg, float planning_horizon);
+
+	void initialize();
+
 	void set_coefficients(const Eigen::MatrixXd &c);
 	void set_planning_horizon(double time);
+
 	Eigen::MatrixXd get_coefficients();
 	obj_traj_est::traj_msg to_rosmsg();
+
 	Eigen::MatrixXd evaluate(const Eigen::VectorXd &times,int order);
 	Eigen::VectorXd gen_basis(double time, int order);
+
 	visualization_msgs::Marker to_vismsg();
 
 };
