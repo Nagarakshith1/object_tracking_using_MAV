@@ -20,16 +20,15 @@
 <group ns = "april_tag">
 	<param name = "robot_description_april" command = "$(find xacro)/xacro '$(find simulator)/urdf/april_tag.xacro'"/>
 	<node name = "urdf_spawner" pkg = "gazebo_ros" type = "spawn_model" respawn = "false" output = "screen" args = "-urdf -model april_tag -param robot_description_april"/>
-	<node name = "move_target" pkg = "simulator" type = "move_target" respawn = "false" output = "screen"/>
+	<node name = "move_target" pkg = "simulator" type = "move_target" respawn = "false" output = "screen">
+			<rosparam command="load" file="$(find simulator)/config/params.yaml" />
+	</node>
 	<node name = "obj_traj" pkg = "obj_traj_est" type = "obj_traj" respawn = "false" output = "screen">
 		<remap from = "~odom" to = "/ddk/ground_truth/odom"/>
 		<remap from = "~apriltag_poses" to = "/ddk/dfc_camera/apriltag_pose_estimator/apriltag_poses"/>
 		<remap from = "~obj_traj_coeff" to = "/obj_traj_coeff"/>
 		<remap from = "~obj_traj_vis" to = "/obj_traj_vis"/>
 		<rosparam command="load" file="$(find obj_traj_est)/config/params.yaml" />
-		<group ns="object">
-			<rosparam command="load" file="$(simulator)/config/params.yaml" />
-		</group>
 	</node>
 </group>
 
@@ -110,13 +109,13 @@
 	<param name = "planning_horizon" value = "3.0"/>
 	<param name = "drone_height" value = "$(arg drone_height)"/>
 	<param name = "planning_rate" value = "20"/>
-	<rosparam command="load" file="$(drone_planner)/config/params.yaml" />
+	<rosparam command="load" file="$(find drone_planner)/config/params.yaml" />
 </node>
 
 <node name = "cntrl_cmds" pkg = "drone_planner" type = "cntrl_cmds" respawn = "false" output = "screen">
 	<remap from = "~drone_traj_coeff" to = "/drone_traj_coeff"/>
 	<remap from = "~cmd_vel" to = "/ddk/cmd_vel"/>
-	<rosparam command="load" file="$(drone_planner)/config/params.yaml" />
+	<rosparam command="load" file="$(find drone_planner)/config/params.yaml" />
 </node>
 
 

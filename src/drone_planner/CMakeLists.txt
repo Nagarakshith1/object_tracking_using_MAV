@@ -57,9 +57,9 @@ add_executable(planner src/planner.cpp)
 add_dependencies(planner ${catkin_EXPORTED_TARGETS})
 target_link_libraries(planner traj genQ ${NLOPT_LIBRARIES} ${catkin_LIBRARIES})
 
-add_executable(cntrl src/cntrl_cmds.cpp)
-add_dependencies(cntrl planner ${catkin_EXPORTED_TARGETS})
-target_link_libraries(cntrl traj ${catkin_LIBRARIES})
+add_executable(cntrl_cmds src/cntrl_cmds.cpp)
+add_dependencies(cntrl_cmds planner ${catkin_EXPORTED_TARGETS})
+target_link_libraries(cntrl_cmds traj ${catkin_LIBRARIES})
 
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
