@@ -1,6 +1,7 @@
 n_order: 7
 n_dim: 3
 planning_horizon: 3.0
+executing_horizon: 0.5
 planning_rate: 20
 drone_height: 3.0
 lambda_0: 0.0
