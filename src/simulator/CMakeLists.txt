@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf2
   tf2_ros
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -143,6 +144,9 @@ target_link_libraries(move_target ${catkin_LIBRARIES})
 
 add_executable(move_drone src/move_drone.cpp)
 target_link_libraries(move_drone ${catkin_LIBRARIES})
+
+add_executable(drone_takeoff src/drone_takeoff.cpp)
+target_link_libraries(drone_takeoff ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

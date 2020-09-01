@@ -18,13 +18,13 @@ Traj::Traj(const obj_traj_est::traj_msg& msg, float planning_horizon){
 
 	_planning_horizon = planning_horizon;
 	_n_dimensions = 3;
-	_n_order = msg.coeff_x.size();
+	_n_order = msg.coeff_x.size()-1;
 
-	_coefficients.resize(_n_order,_n_dimensions);
+	_coefficients.resize(_n_order+1,_n_dimensions);
 
-	for(int i = 0; i < _n_order; i++) { _coefficients(i,0) = msg.coeff_x[i]; }
-	for(int i = 0; i < _n_order; i++) { _coefficients(i,1) = msg.coeff_y[i]; }
-	for(int i = 0; i < _n_order; i++) { _coefficients(i,2) = msg.coeff_z[i]; }
+	for(int i = 0; i < _n_order + 1; i++) { _coefficients(i,0) = msg.coeff_x[i]; }
+	for(int i = 0; i < _n_order + 1; i++) { _coefficients(i,1) = msg.coeff_y[i]; }
+	for(int i = 0; i < _n_order + 1; i++) { _coefficients(i,2) = msg.coeff_z[i]; }
 
 	Traj::initialize();
 }

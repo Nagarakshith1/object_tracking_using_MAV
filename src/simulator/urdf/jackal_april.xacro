@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<robot name="jackal_april" xmlns:xacro="http://ros.org/wiki/xacro">
+	<xacro:include filename="$(find jackal_description)/urdf/jackal.urdf.xacro"/>
+
+	<material name="white">
+  		<color rgba="1 1 1 1"/> 
+	</material>
+
+	<link name="april_tag_link">
+		<visual>
+			<geometry>
+				<box size="0.2 0.2 0.001"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<material name = "white"/>
+		</visual>
+	</link>
+
+	<link name="april_tag_background_link">
+		<visual>
+			<geometry>
+				<box size="0.25 0.25 0.001"/>
+			</geometry>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<material name = "white"/>
+		</visual>
+	</link>
+
+	<joint name = "jackal_april_background_joint" type = "fixed">
+		<parent link = "base_link"/>
+		<child link = "april_tag_background_link"/>
+		<origin xyz = "0 0 0.185" rpy = "0.0 0.0 0.0"/>
+	</joint>
+
+ 	<joint name = "april_background_joint" type = "fixed">
+		<parent link = "april_tag_background_link"/>
+		<child link = "april_tag_link"/>
+		<origin xyz = "0 0 0.01" rpy = "0.0 0.0 0.0"/>
+  	</joint>
+
+  	<gazebo reference="april_tag_link">
+		<material>Apriltag1</material>
+ 	</gazebo>
+
+  	<gazebo reference="april_tag_background_link">
+		<material>Gazebo/White</material>
+  	</gazebo>
+
+</robot>

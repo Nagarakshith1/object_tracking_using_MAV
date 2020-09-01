@@ -1,0 +1,12 @@
+digraph G {
+"odom" -> "april_tag_link"[label="Broadcaster: /gazebo\nAverage rate: 19.812 Hz\nMost recent transform: 259.944 ( 0.008 sec old)\nBuffer length: 4.896 sec\n"];
+"ddk/camera_link" -> "tag_2"[label="Broadcaster: /ddk/dfc_camera/apriltag_pose_estimator\nAverage rate: 5.208 Hz\nMost recent transform: 259.855 ( 0.097 sec old)\nBuffer length: 4.800 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 259.952"[ shape=plaintext ] ;
+ }->"odom";
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 259.952"[ shape=plaintext ] ;
+ }->"ddk/camera_link";
+}
