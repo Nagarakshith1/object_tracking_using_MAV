@@ -59,10 +59,14 @@ void drone_odom_callback(const nav_msgs::Odometry::ConstPtr& msg) {
 	
 	drone_state.x_pos = msg->pose.pose.position.x;
 	drone_state.y_pos = msg->pose.pose.position.y;
+
+
 	drone_state.z_pos = msg->pose.pose.position.z; 
 
 	drone_state.x_vel = msg->twist.twist.linear.x;
 	drone_state.y_vel = msg->twist.twist.linear.y;
+	
+
 	drone_state.z_vel = msg->twist.twist.linear.z;
 }
 

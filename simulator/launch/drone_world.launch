@@ -77,7 +77,6 @@
 </node>
 
 <!-- Drone velocity publisher -->
-
 <node name = "cntrl_cmds" pkg = "drone_planner" type = "cntrl_cmds" respawn = "false" output = "screen">
 	<remap from = "~drone_traj_coeff" to = "/drone_traj_coeff"/>
 	<remap from = "~cmd_vel" to = "/ddk/cmd_vel"/>
