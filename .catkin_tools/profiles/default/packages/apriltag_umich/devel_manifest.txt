@@ -1,6 +1,0 @@
-apriltag/apriltag_umich
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_umich/cmake.lock /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/./cmake.lock
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_umich/lib/libapriltag_umich.so /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/lib/libapriltag_umich.so
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_umich/lib/pkgconfig/apriltag_umich.pc /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/lib/pkgconfig/apriltag_umich.pc
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_umich/share/apriltag_umich/cmake/apriltag_umichConfig.cmake /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/share/apriltag_umich/cmake/apriltag_umichConfig.cmake
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_umich/share/apriltag_umich/cmake/apriltag_umichConfig-version.cmake /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/share/apriltag_umich/cmake/apriltag_umichConfig-version.cmake

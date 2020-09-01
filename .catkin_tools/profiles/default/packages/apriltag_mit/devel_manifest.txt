@@ -1,6 +1,0 @@
-apriltag/apriltag_mit
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_mit/cmake.lock /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/./cmake.lock
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_mit/lib/libapriltag_mit.so /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/lib/libapriltag_mit.so
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_mit/lib/pkgconfig/apriltag_mit.pc /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/lib/pkgconfig/apriltag_mit.pc
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_mit/share/apriltag_mit/cmake/apriltag_mitConfig-version.cmake /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/share/apriltag_mit/cmake/apriltag_mitConfig-version.cmake
-/home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/.private/apriltag_mit/share/apriltag_mit/cmake/apriltag_mitConfig.cmake /home/ravi/Ravi_D/Acadamic/UPENN/Summer/Scarab/object_tracking_using_MAV/devel/share/apriltag_mit/cmake/apriltag_mitConfig.cmake
