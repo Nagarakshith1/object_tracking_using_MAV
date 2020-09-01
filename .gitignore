@@ -1,0 +1,7 @@
+build
+devel
+/src/mrsl_quadrotor
+/src/multi_mav_manager
+/src/qflight_descriptions
+/src/quadrotor_control
+/src/waypoint_navigation_plugin
