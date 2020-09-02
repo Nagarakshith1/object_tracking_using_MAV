@@ -3,9 +3,14 @@ project(drone_planner)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
-SET(NLOPT_LIBRARY "/usr/local/lib/libnlopt.so")
-SET(NLOPT_LIBRARIES "/usr/local/lib/libnlopt.so.0" "/usr/local/lib/libnlopt.so.0.10.0")
-SET(NLOPT_INCLUDE_DIRS "/usr/local/include")
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
+find_package(NLOPT REQUIRED)
+message("WARN NLOPT version ${NLOPT_VERSION}")
+
+#SET(NLOPT_LIBRARY "/usr/local/lib/libnlopt.so")
+#SET(NLOPT_LIBRARIES "/usr/local/lib/libnlopt.so.0" "/usr/local/lib/libnlopt.so.0.10.0")
+#SET(NLOPT_INCLUDE_DIRS "/usr/local/include")
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
@@ -18,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(Eigen3 REQUIRED)
 
-catkin_package(INCLUDE_DIRS 
+catkin_package(INCLUDE_DIRS
   include
   #LIBRARIES drone_planner
   CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs nav_msgs visualization_msgs obj_traj_est
@@ -55,11 +60,11 @@ add_library(genQ src/genQ.cpp)
 
 add_executable(planner src/planner.cpp)
 add_dependencies(planner ${catkin_EXPORTED_TARGETS})
-target_link_libraries(planner traj genQ ${NLOPT_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(planner genQ ${NLOPT_LIBRARIES} ${catkin_LIBRARIES})
 
 add_executable(cntrl_cmds src/cntrl_cmds.cpp)
 add_dependencies(cntrl_cmds planner ${catkin_EXPORTED_TARGETS})
-target_link_libraries(cntrl_cmds traj ${catkin_LIBRARIES})
+target_link_libraries(cntrl_cmds ${catkin_LIBRARIES})
 
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
