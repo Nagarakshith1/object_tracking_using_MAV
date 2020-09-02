@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   message_generation
   visualization_msgs
+  apriltag_msgs
   ${MESSAGE_DEPENDENCIES}
 )
 find_package(Eigen3 REQUIRED)
@@ -29,8 +30,8 @@ generate_messages(
 
 catkin_package(INCLUDE_DIRS 
   include
-  #LIBRARIES obj_traj_est
-  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs message_runtime visualization_msgs
+  LIBRARIES traj
+  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs message_runtime visualization_msgs apriltag_msgs
   #DEPENDS Eigen3
 )
 
@@ -50,6 +51,13 @@ add_library(traj src/traj.cpp)
 add_executable(obj_traj src/obj_traj.cpp)
 add_dependencies(obj_traj ${catkin_EXPORTED_TARGETS})
 target_link_libraries(obj_traj k_filter traj ${catkin_LIBRARIES})
+
+install(
+  TARGETS traj
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+)
 
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}

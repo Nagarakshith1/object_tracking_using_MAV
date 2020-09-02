@@ -70,7 +70,7 @@
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>visualization_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
-
+  <depend>apriltag_msgs</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
