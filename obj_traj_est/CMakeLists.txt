@@ -45,11 +45,11 @@ include_directories(
 
 add_library(k_filter src/k_filter.cpp)
 add_library(traj src/traj.cpp)
-
+add_dependencies(traj ${${PROJECT_NAME}_EXPORTED_TARGETS}) 
 
 
 add_executable(obj_traj src/obj_traj.cpp)
-add_dependencies(obj_traj ${catkin_EXPORTED_TARGETS})
+add_dependencies(obj_traj ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(obj_traj k_filter traj ${catkin_LIBRARIES})
 
 install(
