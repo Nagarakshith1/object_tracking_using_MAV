@@ -44,7 +44,7 @@
 <include file = "$(find simulator)/launch/jackal_april.launch"/>
 
 <!-- Apriltag detection -->
-<include file = "$(find apriltag_ros)/launch/pose_estimator.launch">
+<include file = "$(find simulator)/launch/april_tag.launch">
 	<arg name = "camera" value = "/ddk/dfc_camera"/>
 </include>
 
@@ -69,10 +69,7 @@
 	<remap from = "~obj_traj_coeff" to = "/obj_traj_coeff"/>
 	<remap from = "~drone_traj_vis" to = "/drone_traj_vis"/>
 	<remap from = "~drone_traj_coeff" to = "/drone_traj_coeff"/>
-
-	<param name = "planning_horizon" value = "3.0"/>
 	<param name = "drone_height" value = "$(arg drone_height)"/>
-	<param name = "planning_rate" value = "20"/>
 	<rosparam command="load" file="$(find drone_planner)/config/params.yaml" />
 </node>
 

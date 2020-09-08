@@ -1,12 +1,11 @@
 n_order: 7
 n_dim: 3
 planning_horizon: 3.0
-executing_horizon: 0.5
+executing_horizon: 1.0
 planning_rate: 20
-drone_height: 3.0
-lambda_0: 0.0
+lambda_0: 0.3
 lambda_1: 0.3
-lambda_3: 0.0
+lambda_3: 0.0004
 max_accel_coeff: 2.5
 max_angacc: 30.0
 weights: 0.25
