@@ -21,10 +21,12 @@ $ roslaunch simulator drone_world.launch
 ```
 ## Gazebo View
 *Click on to watch the video*
+>
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/XNe5X765P6k/0.jpg)](https://www.youtube.com/watch?v=XNe5X765P6k)
 
 ## RViz View
 *Click on to watch the video*
+>
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/PovK8Gs4ods/0.jpg)](https://www.youtube.com/watch?v=PovK8Gs4ods)
 
 
