@@ -21,7 +21,7 @@
 <include file = "$(find mrsl_quadrotor_launch)/launch/spawn.launch">
 	<arg name = "mav_type" value = "dragon_ddk"/>
 	<arg name = "mav_name" value = "ddk"/>
-	<arg name="z" default="1.5"/>
+	<arg name="z" default="1"/>
 	<arg name="Y" default="0.0"/>
 </include>
 

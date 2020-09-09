@@ -18,6 +18,7 @@ double weights;						// Weight of the robot
 double lambda_0;					// Position weighting factor in the cost function
 double lambda_1;					// Velocity weighting factor in the cost function
 double lambda_3;					// Jerk weighting factor in the cost function
+double confidence_constant;
 
 const double gravity  = 9.81;
 double max_accel_coeff;
@@ -143,9 +144,13 @@ double objective_function(const std::vector<double> &x, std::vector<double> &gra
 		lambda_0 = 0.5;
 	}
 	else lambda_0 = 0.3;
+	
+	// Calculate the axis and the angle about which the normals have to be rotated
+	auto e3 = Eigen::Vector3d::UnitZ();
+	double angle = std::fabs(std::acos(e3.transpose() * (- b / b.norm())));
 
 	// Add an offest of the desired height
-	h_copy(n_dim*n_coeff - 1) = drone_height;
+	h_copy(n_dim*n_coeff - 1) = drone_height + confidence_constant * angle;
 	
 	auto Q_net = lambda_0 * Q_pos + lambda_1 * Q_vel + lambda_3 * Q_jerk;
 	
@@ -422,6 +427,7 @@ int main(int argc, char **argv)
 	n.getParam("lambda_3", lambda_3);
 	n.getParam("max_accel_coeff", max_accel_coeff);
 	n.getParam("max_angacc", max_angacc);
+	n.getParam("confidence_constant", confidence_constant);
 
 	n.param("x_fov", x_fov, M_PI / 2);
 	n.param("y_fov", y_fov, M_PI  / 2);
