@@ -12,8 +12,8 @@ The target is always to be kept in the Field of View of the camera for continuou
 - [mrsl_quadrotor](https://github.com/KumarRobotics/mrsl_quadrotor)
 - [qflight_descriptions](https://github.com/ATLFlight/qflight_descriptions)
 - [waypoint_navigation_plugin](https://github.com/KumarRobotics/waypoint_navigation_plugin)
-- [quadrotor_control](https://github.com/KumarRobotics/quadrotor_control) (Not yet open sourced)
-- [multi_mav_manager](https://github.com/KumarRobotics/multi_mav_manager) (Not yet open sourced)
+- [quadrotor_control](https://github.com/KumarRobotics/quadrotor_control)
+- [multi_mav_manager](https://github.com/KumarRobotics/multi_mav_manager)
 
 ## Usage
 ```
